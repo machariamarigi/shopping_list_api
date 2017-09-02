@@ -1,3 +1,3 @@
-# Bucketlist API
+# Shoppinglist API
 
-Application Programming Interface for a bucketlist app.
+Application Programming Interface for a shoppinglist app.
