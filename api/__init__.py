@@ -25,7 +25,6 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
 
-
     from .api_v1 import api as api_v1_blueprint
     app.register_blueprint(api_v1_blueprint, url_prefix="/api/v1")
 
