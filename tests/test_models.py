@@ -1,5 +1,5 @@
 from tests.basetest import TestBase
-from models import User, Shoppinglist
+from models import User, Shoppinglist, Shoppingitem
 
 
 class UserTestCase(TestBase):
@@ -31,12 +31,18 @@ class UserTestCase(TestBase):
 class ShoppinglistTestCase(TestBase):
     """Class to test the shoppinglist model"""
     def test_shoppinglist_model(self):
-        """Test number of shoppinglists in the shoppinglist table"""
+        """Test number of shoppinglists in the shoppinglists table"""
         shoppinglist = Shoppinglist(name="Groceries")
         shoppinglist.save()
 
         self.assertEqual(Shoppinglist.query.count(), 1)
 
-class ShoppingItemTese(TestBase):
+
+class ShoppingitemTestCase(TestBase):
     """Class to test the shopping item model"""
-    pass
+    def test_shopping_item_model(self):
+        """Test number of shopping items in the shoppingitems table"""
+        item = Shoppingitem(item="Eggplant", quantity=5)
+        item.save()
+
+        self.assertEqual(Shoppingitem.query.count(), 1)
