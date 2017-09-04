@@ -1,16 +1,11 @@
-from tests.basetest import TestBase
+from .basetest import TestBase
 
 
-class UserTestCase(TestBase):
-    """Class to to test the user model"""
+class APITestCase(TestBase):
+    """Class to test the API"""
     pass
 
 
-class ShoppinglistTestCase(TestBase):
-    """Class to test the shopping list model"""
-    pass
-
-
-class ShoppingItemTese(TestBase):
-    """Class to test the shopping item model"""
+class TestErrors(TestBase):
+    """Test error codes and ensure they return json information"""
     pass
