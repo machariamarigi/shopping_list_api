@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/machariamarigi/shopping_list_api.svg)](https://travis-ci.org/machariamarigi/shopping_list_api) [![Coverage Status](https://coveralls.io/repos/github/machariamarigi/shopping_list_api/badge.svg?branch=development)](https://coveralls.io/github/machariamarigi/shopping_list_api?branch=development) [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # Shoppinglist API
 
 Application Programming Interface for a shoppinglist app.
