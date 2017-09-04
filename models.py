@@ -52,5 +52,9 @@ class User(BaseModel):
         self.password_hash = generate_password_hash(password)
 
     def authenticate_password(self, password):
-        """Che"""
+        """Check password hashing"""
         return check_password_hash(self.password_hash, password)
+
+
+class Shoppinglist(BaseModel):
+    pass

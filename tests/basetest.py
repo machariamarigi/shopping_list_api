@@ -2,7 +2,7 @@
 from unittest import TestCase
 from app import create_app
 
-from models import db
+from models import db, User
 
 
 class TestBase(TestCase):
@@ -15,6 +15,12 @@ class TestBase(TestCase):
         self.app_cntx.push()
         db.drop_all()
         db.create_all()
+
+        self.user = User(
+            username="marigi",
+            email="marigi@gm.cm",
+            password="cool"
+        )
 
     def tearDown(self):
         self.app_cntx.pop()
