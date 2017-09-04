@@ -1,19 +1,18 @@
-# from flask_testing import TestCase
-from unittest import TestCase
-from app import create_app
+from flask_testing import TestCase
 
+from app import create_app
 from models import db, User
 
 
 class TestBase(TestCase):
     """Base class which other tests will inherit from"""
 
-    def setUp(self):
-        app = create_app('testing')
+    def create_app(self):
+        config_name = 'testing'
+        app = create_app(config_name)
+        return app
 
-        self.app_cntx = app.app_context()
-        self.app_cntx.push()
-        db.drop_all()
+    def setUp(self):
         db.create_all()
 
         self.user = User(
@@ -23,4 +22,6 @@ class TestBase(TestCase):
         )
 
     def tearDown(self):
-        self.app_cntx.pop()
+
+        db.session.remove()
+        db.drop_all()
