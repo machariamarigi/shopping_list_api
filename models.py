@@ -8,7 +8,6 @@ class BaseModel(db.Model):
     """Base model contains common utilities"""
 
     __abstract__ = True
-    uuid = db.Column(db.Integer, primary_key=True)
 
     def save(self):
         """Common method of saving to a database"""
@@ -32,9 +31,12 @@ class BaseModel(db.Model):
 class User(BaseModel):
     """Model the user"""
     __tablename__ = 'users'
+    uuid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    bucketlists = db.relationship(
+        'Shoppinglist', backref='creator', lazy='dynamic')
 
     def __init__(self, username, email, password):
         self.username = username
@@ -57,4 +59,28 @@ class User(BaseModel):
 
 
 class Shoppinglist(BaseModel):
-    pass
+    """Model for the shoppinglist"""
+    __tablename__ = 'shoppinglists'
+
+    uuid = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255))
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(
+    ), onupdate=db.func.current_timestamp())
+    created_by = db.Column(db.Integer, db.ForeignKey('users.uuid'))
+    items = db.relationship(
+        'Shoppingitem', backref='creator', lazy='dynamic')
+
+
+class Shoppingitem(BaseModel):
+    """Class represents shoppingitems table"""
+    __tablename__ = "shoppingitems"
+
+    # Define columns for users table
+    uuid = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(256))
+    quantity = db.Column(db.String(256))
+    date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(
+    ), onupdate=db.func.current_timestamp())
+    shoppinglist = db.Column(db.Integer, db.ForeignKey('shoppinglists.uuid'))
