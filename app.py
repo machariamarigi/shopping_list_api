@@ -1,8 +1,8 @@
+"""Module containing factory function for the application"""
 from flask import Flask
 
 from config import app_config
-from models import db
-from api_endpoints import api
+from api_v1.models import db
 
 
 def create_app(environment):
@@ -12,6 +12,5 @@ def create_app(environment):
     db.init_app(app)
 
     # add urls here
-    api.init_app(app)
 
     return app

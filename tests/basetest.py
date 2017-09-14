@@ -1,7 +1,10 @@
+"""
+    Module containing a TestBase class which other testbases will inherit from
+"""
 from flask_testing import TestCase
 
 from app import create_app
-from models import db, User
+from api_v1.models import db, User
 
 
 class TestBase(TestCase):

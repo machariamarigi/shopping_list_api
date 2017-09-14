@@ -1,5 +1,6 @@
+"""Module for testing modles for the API"""
 from tests.basetest import TestBase
-from models import User, Shoppinglist, Shoppingitem
+from api_v1.models import User, Shoppinglist, Shoppingitem
 
 
 class UserTestCase(TestBase):
