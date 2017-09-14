@@ -8,7 +8,7 @@ from flask_migrate import Migrate, MigrateCommand
 
 # local import
 from app import create_app
-from models import db
+from api_v1.models import db
 
 
 config_name = os.getenv('FLASK_CONFIG')
