@@ -1,3 +1,4 @@
+"""Module that contains the API's data models"""
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -5,7 +6,7 @@ db = SQLAlchemy()
 
 
 class BaseModel(db.Model):
-    """Base model contains common utilities"""
+    """Base model contains common methods"""
 
     __abstract__ = True
 
@@ -50,12 +51,16 @@ class User(BaseModel):
 
     @password.setter
     def password(self, password):
-        """Generate a password hass"""
+        """Generate a password hash"""
         self.password_hash = generate_password_hash(password)
 
     def authenticate_password(self, password):
         """Check password hashing"""
         return check_password_hash(self.password_hash, password)
+
+    def __repr__(self):
+        """Return a representation of the user model instance"""
+        return "<User: {}>".format(self.name)
 
 
 class Shoppinglist(BaseModel):
@@ -71,6 +76,10 @@ class Shoppinglist(BaseModel):
     items = db.relationship(
         'Shoppingitem', backref='creator', lazy='dynamic')
 
+    def __repr__(self):
+        """Return a representation of the shopping list model instance"""
+        return "<Shopping List: {}>".format(self.name)
+
 
 class Shoppingitem(BaseModel):
     """Class represents shoppingitems table"""
@@ -84,3 +93,7 @@ class Shoppingitem(BaseModel):
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(
     ), onupdate=db.func.current_timestamp())
     shoppinglist = db.Column(db.Integer, db.ForeignKey('shoppinglists.uuid'))
+
+    def __repr__(self):
+        """Return a representation of the Item model instance"""
+        return "<Item: {}>".format(self.name)
