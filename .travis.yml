@@ -17,7 +17,7 @@ before_script:
  
 
 script:
-  - coverage run --source=. -m py.test && coverage report
+  - coverage run --source=api_v1 -m py.test && coverage report
   - coveralls
 after_sucess:
   - coveralls
