@@ -60,7 +60,7 @@ class User(BaseModel):
 
     def __repr__(self):
         """Return a representation of the user model instance"""
-        return "<User: {}>".format(self.name)
+        return "<User: {}>".format(self.username)
 
 
 class Shoppinglist(BaseModel):
