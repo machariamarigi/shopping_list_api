@@ -24,6 +24,12 @@ class TestBase(TestCase):
             password="cool"
         )
 
+        self.user_data = {
+            'username': 'test',
+            'email': 'test@test.com',
+            'password': 'test_password'
+        }
+
     def tearDown(self):
 
         db.session.remove()

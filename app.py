@@ -22,6 +22,10 @@ def create_app(environment):
     db.init_app(app)
 
     app.register_blueprint(Blueprint_apiV1)
-    # add urls here
+
+    # add namespaces here
+    from api_v1 import authenticate
+    Api_V1.add_namespace(authenticate.auth)
+
 
     return app
