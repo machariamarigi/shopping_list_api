@@ -41,6 +41,7 @@ class User(BaseModel):
     username = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    joined_on = db.Column(db.DateTime(), default=datetime.utcnow)
     bucketlists = db.relationship(
         'Shoppinglist', backref='creator', lazy='dynamic')
 
