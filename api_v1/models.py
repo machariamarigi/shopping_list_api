@@ -1,6 +1,11 @@
 """Module that contains the API's data models"""
+from datetime import datetime, timedelta
+
+from flask import current_app
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
+
+import jwt
 
 db = SQLAlchemy()
 
@@ -36,6 +41,7 @@ class User(BaseModel):
     username = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), index=True, unique=True)
     password_hash = db.Column(db.String(128))
+    joined_on = db.Column(db.DateTime(), default=datetime.utcnow)
     bucketlists = db.relationship(
         'Shoppinglist', backref='creator', lazy='dynamic')
 
@@ -57,6 +63,36 @@ class User(BaseModel):
     def authenticate_password(self, password):
         """Check password hashing"""
         return check_password_hash(self.password_hash, password)
+
+    def generate_token(self, user_id):
+        """Generate the acces token"""
+        try:
+            payload = {
+                'exp': datetime.utcnow() + timedelta(minutes=5),
+                'iat': datetime.utcnow(),
+                'sub': user_id
+            }
+
+            jwt_string = jwt.encode(
+                payload,
+                current_app.config.get('SECRET_KEY'),
+                algorithm='HS256'
+            )
+
+            return jwt_string
+        except Exception as excep:
+            return str(excep)
+
+    @staticmethod
+    def decode_token(token):
+        """Decodes the access token from the Authorization header."""
+        try:
+            payload = jwt.decode(token, current_app.config.get('SECRET_KEY'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            return "Expired token. Please login to get a new token"
+        except jwt.InvalidTokenError:
+            return "Invalid token. Please register or login"
 
     def __repr__(self):
         """Return a representation of the user model instance"""
