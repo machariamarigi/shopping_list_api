@@ -1,6 +1,5 @@
 """This module contains registration and login features."""
 
-from flask import make_response, request, jsonify
 from flask_restplus import Namespace, Resource, reqparse, fields
 
 from api_v1.models import User
@@ -34,7 +33,6 @@ class Registration(Resource):
     """Class to handle registering of new users"""
 
     @auth.doc(body=register_args_model)
-    @auth.marshal_with(register_response_model, code=201)
     def post(self):
         """Handle registering of users. Url --> /auth/register"""
 
@@ -104,7 +102,6 @@ class Login(Resource):
     """Class to login registered users."""
 
     @auth.doc(body=login_args_model)
-    @auth.marshal_with(login_response_model, code=201)
     def post(self):
         """Handle logging in of registered users. Url --> /auth/login"""
 
@@ -124,7 +121,6 @@ class Login(Resource):
         try:
             user = User.query.filter_by(email=args2['email']).first()
             if user and user.authenticate_password(args2['password']):
-                import pdb; pdb.set_trace()
                 access_token = user.generate_token(user.uuid)
                 if access_token:
                     response = {
