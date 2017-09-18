@@ -1,6 +1,5 @@
 """This module contains registration and login features."""
 
-from flask import make_response, request, jsonify
 from flask_restplus import Namespace, Resource, reqparse, fields
 
 from api_v1.models import User
@@ -10,47 +9,53 @@ auth = Namespace(
 
 
 register_args_model = auth.model(
-    'registration_args', {
-        'email': fields.String(required=True),
-        'password': fields.String(required=True),
-        'username': fields.String(required=True),
-    })
-register_response_model = auth.model('Register_response', {
-    'message': fields.String,
-    'status': fields.String,
-})
+    'registration_args',
+    {
+        'email': fields.String(required=True, default="user@example.com"),
+        'password': fields.String(required=True, default="password_example"),
+        'username': fields.String(required=True, default="user_example"),
+    }
+)
+register_response_model = auth.model(
+    'Register_response',
+    {
+        'message': fields.String,
+        'status': fields.String,
+    }
+)
 
-parser = reqparse.RequestParser()
+parser1 = reqparse.RequestParser()
+parser2 = reqparse.RequestParser()
 
 
 @auth.route("/register", endpoint='register')
 class Registration(Resource):
-    """This class registers a new user."""
+    """Class to handle registering of new users"""
 
-    @auth.doc(body=register_args_model)
-    @auth.marshal_with(register_response_model, code=201)
+    @auth.expect(register_args_model)
+    @auth.marshal_with(register_response_model)
     def post(self):
         """Handle registering of users. Url --> /auth/register"""
 
-        parser.add_argument(
+        parser1.add_argument(
             'username',
             required=True,
             help='required and must be a string'
         )
-        parser.add_argument(
+        parser1.add_argument(
             'email',
             required=True,
             help='required and must be a string'
         )
-        parser.add_argument(
+        parser1.add_argument(
             'password',
             required=True,
             help='required and must be a string'
         )
-        args = parser.parse_args()
-        user = User.query.filter_by(email=args['email']).first()
+        args = parser1.parse_args()
+        user_email = User.query.filter_by(email=args['email']).first()
 
-        if not user:
+        if not user_email:
             try:
                 username = args['username']
                 email = args['email']
@@ -66,6 +71,7 @@ class Registration(Resource):
                 response = {
                     'message': str(e)
                 }
+                return response, 500
         else:
             # There is an existing user. We don't want to register users twice
             # Return a message to the user telling them that they they already exist
@@ -73,37 +79,67 @@ class Registration(Resource):
                 'message': 'User already exists. Please login.',
                 'status': 'Registration failed'
             }
-
             return response, 202
-        # Query to see if the user already exists
-        # user = User.query.filter_by(email=request.data['email']).first()
 
-        # if not user:
-        #     # There is no user so we'll try to register them
-        #     try:
-        #         # Register the user
-        #         username = self.args['username']
-        #         email = post_data['email']
-        #         password = post_data['password']
-        #         user = User(email=email, password=password, username=username)
-        #         user.save()
 
-        #         response = {
-        #             'message': 'You registered successfully. Please log in.'
-        #         }
-        #         # return a response notifying the user that they registered successfully
-        #         return make_response(jsonify(response)), 201
-        #     except Exception as e:
-        #         # An error occured, therefore return a string message containing the error
-        #         response = {
-        #             'message': str(e)
-        #         }
-        #         return make_response(jsonify(response)), 401
-        # else:
-        #     # There is an existing user. We don't want to register users twice
-        #     # Return a message to the user telling them that they they already exist
-        #     response = {
-        #         'message': 'User already exists. Please login.'
-        #     }
+login_args_model = auth.model(
+    'login_args_model',
+    {
+        'email': fields.String(required=True, default="user@example.com"),
+        'password': fields.String(required=True, default="password_example")
+    }
+)
 
-        #     return make_response(jsonify(response)), 202
+login_response_model = auth.model(
+    'login_repsonse', {
+        'message': fields.String,
+        'status': fields.String,
+        'token': fields.String(default="No Token"),
+    })
+
+
+@auth.route("/login", endpoint='login')
+class Login(Resource):
+    """Class to login registered users."""
+
+    @auth.expect(login_args_model)
+    @auth.marshal_with(login_response_model)
+    def post(self):
+        """Handle logging in of registered users. Url --> /auth/login"""
+
+        parser2.add_argument(
+            'email',
+            required=True,
+            help='required and must be a string'
+        )
+        parser2.add_argument(
+            'password',
+            required=True,
+            help='required and must be a string'
+        )
+
+        args2 = parser2.parse_args()
+
+        try:
+            user = User.query.filter_by(email=args2['email']).first()
+            if user and user.authenticate_password(args2['password']):
+                access_token = user.generate_token(user.uuid)
+                if access_token:
+                    response = {
+                        'message': 'You logged in successfully.',
+                        'status': 'Logged in!',
+                        'token': access_token.decode()
+                    }
+                    return response, 200
+            else:
+                response = {
+                    'message': 'Invalid email or password, Please try again',
+                    'status': 'Login Failed'
+                }
+                return response, 401
+
+        except Exception as e:
+            response = {
+                'message': str(e)
+            },
+            return response, 500
