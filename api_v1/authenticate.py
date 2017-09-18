@@ -11,9 +11,9 @@ auth = Namespace(
 register_args_model = auth.model(
     'registration_args',
     {
-        'email': fields.String(required=True),
-        'password': fields.String(required=True),
-        'username': fields.String(required=True),
+        'email': fields.String(required=True, default="user@example.com"),
+        'password': fields.String(required=True, default="password_example"),
+        'username': fields.String(required=True, default="user_example"),
     }
 )
 register_response_model = auth.model(
@@ -32,7 +32,8 @@ parser2 = reqparse.RequestParser()
 class Registration(Resource):
     """Class to handle registering of new users"""
 
-    @auth.doc(body=register_args_model)
+    @auth.expect(register_args_model)
+    @auth.marshal_with(register_response_model)
     def post(self):
         """Handle registering of users. Url --> /auth/register"""
 
@@ -52,9 +53,9 @@ class Registration(Resource):
             help='required and must be a string'
         )
         args = parser1.parse_args()
-        user = User.query.filter_by(email=args['email']).first()
+        user_email = User.query.filter_by(email=args['email']).first()
 
-        if not user:
+        if not user_email:
             try:
                 username = args['username']
                 email = args['email']
@@ -84,8 +85,8 @@ class Registration(Resource):
 login_args_model = auth.model(
     'login_args_model',
     {
-        'email': fields.String(required=True),
-        'password': fields.String(required=True)
+        'email': fields.String(required=True, default="user@example.com"),
+        'password': fields.String(required=True, default="password_example")
     }
 )
 
@@ -101,7 +102,8 @@ login_response_model = auth.model(
 class Login(Resource):
     """Class to login registered users."""
 
-    @auth.doc(body=login_args_model)
+    @auth.expect(login_args_model)
+    @auth.marshal_with(login_response_model)
     def post(self):
         """Handle logging in of registered users. Url --> /auth/login"""
 
