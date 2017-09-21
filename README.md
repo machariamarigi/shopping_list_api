@@ -76,8 +76,15 @@ Application Programming Interface for a shoppinglist app.
 
 ## API
 
+#### Endpoints
+
+| Resource URL                                |      Methods      |        Description        | Requires Token |
+|---------------------------------------------|-------------------|---------------------------|----------------|  
+| /api/v1/auth/register/                      |       POST        |       User registers      | FALSE          |
+| /api/v1/auth/login/                         |       POST        |         User login        | FALSE          |
+
 ```
-Spicey stuff about the API, wait for it...
+More to Come
 ```
 
 ## Authors

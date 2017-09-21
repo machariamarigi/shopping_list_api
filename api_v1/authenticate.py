@@ -35,7 +35,9 @@ class Registration(Resource):
     @auth.expect(register_args_model)
     @auth.marshal_with(register_response_model)
     def post(self):
-        """Handle registering of users. Url --> /auth/register"""
+        """
+            Handle registering of users.
+            Resource Url --> /api/v1/auth/register"""
 
         parser1.add_argument(
             'username',
@@ -105,7 +107,10 @@ class Login(Resource):
     @auth.expect(login_args_model)
     @auth.marshal_with(login_response_model)
     def post(self):
-        """Handle logging in of registered users. Url --> /auth/login"""
+        """
+            Handle logging in of registered users.
+            Resource Url --> /api/v1/auth/login
+        """
 
         parser2.add_argument(
             'email',
