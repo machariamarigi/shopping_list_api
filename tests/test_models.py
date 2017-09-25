@@ -41,7 +41,7 @@ class ShoppinglistTestCase(TestBase):
     """Class to test the shoppinglist model"""
     def test_shoppinglist_model(self):
         """Test number of shoppinglists in the shoppinglists table"""
-        shoppinglist = Shoppinglist(name="Groceries")
+        shoppinglist = Shoppinglist(name="Groceries", created_by=None)
         sholi_repr = repr(shoppinglist)
         shoppinglist.save()
 

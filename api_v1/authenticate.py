@@ -1,4 +1,5 @@
 """This module contains registration and login features."""
+import re
 
 from flask_restplus import Namespace, Resource, reqparse, fields
 
@@ -37,7 +38,8 @@ class Registration(Resource):
     def post(self):
         """
             Handle registering of users.
-            Resource Url --> /api/v1/auth/register"""
+            Resource Url --> /api/v1/auth/register
+        """
 
         parser1.add_argument(
             'username',
@@ -55,13 +57,33 @@ class Registration(Resource):
             help='required and must be a string'
         )
         args = parser1.parse_args()
-        user_email = User.query.filter_by(email=args['email']).first()
+        username = args['username']
+        email = args['email']
+        password = args['password']
+
+        if not re.match("^[a-zA-Z0-9_]*$", username):
+            response = {
+                'message': 'Username cannot contain special characters.',
+                'status': 'Registration failed'
+            }
+            return response, 400
+        if not re.match(r"(^[a-zA-Z0-9_.]+@[a-zA-Z0-9-]+\.[a-z]+$)", email):
+            response = {
+                'message': 'Incorrect email format.',
+                'status': 'Registration failed'
+            }
+            return response, 400
+        if len(password) < 8:
+            response = {
+                'message': 'Password too short.',
+                'status': 'Registration failed'
+            }
+            return response, 400
+
+        user_email = User.query.filter_by(email=email).first()
 
         if not user_email:
             try:
-                username = args['username']
-                email = args['email']
-                password = args['password']
                 user = User(email=email, password=password, username=username)
                 user.save()
                 response = {
@@ -75,13 +97,13 @@ class Registration(Resource):
                 }
                 return response, 500
         else:
-            # There is an existing user. We don't want to register users twice
-            # Return a message to the user telling them that they they already exist
+            messg = 'Email already used.' \
+                    ' Try another one or login if you are already registered'
             response = {
-                'message': 'User already exists. Please login.',
+                'message': messg,
                 'status': 'Registration failed'
             }
-            return response, 202
+            return response, 400
 
 
 login_args_model = auth.model(
