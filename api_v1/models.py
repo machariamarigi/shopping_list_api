@@ -112,6 +112,11 @@ class Shoppinglist(BaseModel):
     items = db.relationship(
         'Shoppingitem', backref='creator', lazy='dynamic')
 
+    def __init__(self, name, created_by=None):
+        self.name = name
+        if created_by:
+            self.created_by = created_by
+
     def __repr__(self):
         """Return a representation of the shopping list model instance"""
         return "<Shopping List: {}>".format(self.name)
