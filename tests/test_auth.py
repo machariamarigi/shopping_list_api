@@ -20,6 +20,69 @@ class AuthTestCase(TestBase):
         )
         self.assertEqual(res.status_code, 201)
 
+    def test_proper_username_registration(self):
+        """
+            Test if API rejects users with special characters in their username
+        """
+        bad_user = {
+            'username': '@/*-ffg',
+            'email': 'test@test.com',
+            'password': 'test_password'
+        }
+
+        res = self.client.post(
+            '/api/v1/auth/register',
+            data=bad_user
+        )
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'],
+            'Username cannot contain special characters.'
+        )
+        self.assertEqual(res.status_code, 400)
+
+    def test_proper_email_registration(self):
+        """
+            Test if API rejects users whose emails have improper format
+        """
+        bad_user = {
+            'username': 'test',
+            'email': 'testestcom',
+            'password': 'test_password'
+        }
+
+        res = self.client.post(
+            '/api/v1/auth/register',
+            data=bad_user
+        )
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'],
+            'Incorrect email format.'
+        )
+        self.assertEqual(res.status_code, 400)
+
+    def test_short_password_registration(self):
+        """
+            Test if API rejects users whose passwords are too short
+        """
+        bad_user = {
+            'username': 'test',
+            'email': 'test@test.com',
+            'password': 'test'
+        }
+
+        res = self.client.post(
+            '/api/v1/auth/register',
+            data=bad_user
+        )
+        result = json.loads(res.data.decode())
+        self.assertEqual(
+            result['message'],
+            'Password too short.'
+        )
+        self.assertEqual(res.status_code, 400)
+
     def test_already_registered(self):
         """Test is users can't be registered more than once"""
         res = self.client.post(
@@ -32,10 +95,10 @@ class AuthTestCase(TestBase):
             data=self.user_data
         )
         result = json.loads(second_res.data.decode())
-        self.assertEqual(second_res.status_code, 202)
-        self.assertEqual(
-            result['message'],
-            "User already exists. Please login."
+        self.assertEqual(second_res.status_code, 400)
+        self.assertIn(
+            "Email already used. Try",
+            result['message']
         )
 
     def test_user_login(self):
