@@ -35,8 +35,10 @@ class BaseModel(db.Model):
 
 
 class User(BaseModel):
-    """Model the user"""
+    """Model for the user"""
+
     __tablename__ = 'users'
+
     uuid = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(64), index=True)
     email = db.Column(db.String(64), index=True, unique=True)
@@ -46,6 +48,8 @@ class User(BaseModel):
         'Shoppinglist', backref='creator', lazy='dynamic')
 
     def __init__(self, username, email, password):
+        """Constructor for the User model"""
+        super().__init__()
         self.username = username
         self.email = email
         self.password = password
@@ -65,7 +69,7 @@ class User(BaseModel):
         return check_password_hash(self.password_hash, password)
 
     def generate_token(self, user_id):
-        """Generate the acces token"""
+        """Generate the access token"""
         try:
             payload = {
                 'exp': datetime.utcnow() + timedelta(minutes=5),
@@ -101,6 +105,7 @@ class User(BaseModel):
 
 class Shoppinglist(BaseModel):
     """Model for the shoppinglist"""
+
     __tablename__ = 'shoppinglists'
 
     uuid = db.Column(db.Integer, primary_key=True)
@@ -113,6 +118,8 @@ class Shoppinglist(BaseModel):
         'Shoppingitem', backref='creator', lazy='dynamic')
 
     def __init__(self, name, created_by=None):
+        """Constructor for Shoppinglist Model"""
+        super().__init__()
         self.name = name
         if created_by:
             self.created_by = created_by
@@ -126,14 +133,22 @@ class Shoppingitem(BaseModel):
     """Class represents shoppingitems table"""
     __tablename__ = "shoppingitems"
 
-    # Define columns for users table
     uuid = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(256))
     quantity = db.Column(db.String(256))
+    bought = db.Column(db.Boolean, default=False, nullable=False)
     date_created = db.Column(db.DateTime, default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime, default=db.func.current_timestamp(
     ), onupdate=db.func.current_timestamp())
     shoppinglist = db.Column(db.Integer, db.ForeignKey('shoppinglists.uuid'))
+
+    def __init__(self, name, quantity, shoppinglist=None):
+        """Constructor for Shoppingitrm model"""
+        super().__init__()
+        self.name = name
+        self.quantity = quantity
+        if shoppinglist:
+            self.shoppinglist = shoppinglist
 
     def __repr__(self):
         """Return a representation of the Item model instance"""
