@@ -53,7 +53,7 @@ class ShoppingitemTestCase(TestBase):
     """Class to test the shopping item model"""
     def test_shopping_item_model(self):
         """Test number of shopping items in the shoppingitems table"""
-        item = Shoppingitem(name="Eggplant", quantity=5)
+        item = Shoppingitem(name="Eggplant", quantity=5, shoppinglist=None)
         item_repr = repr(item)
         item.save()
 

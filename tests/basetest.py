@@ -1,6 +1,8 @@
 """
     Module containing a TestBase class which other testbases will inherit from
 """
+import json
+
 from flask_testing import TestCase
 
 from app import create_app
@@ -36,6 +38,12 @@ class TestBase(TestCase):
         }
 
         self.shoppinglist = {'name': 'Hardware'}
+        self.access_token = None
+        self.shoppinglist_id = None
+        self.item = {
+            'name': 'Hammer',
+            'quantity': 1
+        }
 
     def tearDown(self):
 
@@ -71,32 +79,21 @@ class TestBase(TestCase):
             data=log_user_data
         )
 
-    def register_second_user(
-            self,
-            username="test2",
-            email="test2@test.com",
-            password="test_password"):
-        """Method to register a test user"""
-        reg_user_data = {
-            'username': username,
-            'email': email,
-            'password': password
-        }
+    def get_access_token(self):
+        """Method to generate access token"""
+        self.register_user()
+        result = self.login_user()
+        self.access_token = json.loads(result.data.decode())['token']
 
-        return self.client.post(
-            '/api/v1/auth/register',
-            data=reg_user_data
+    def create_shoppinglist(self):
+        """Method to creare a shoppinglist for testing items"""
+        self.get_access_token()
+
+        res = self.client.post(
+            '/api/v1/shoppinglists',
+            headers=dict(Authorization=self.access_token),
+            data=self.shoppinglist
         )
-
-    def login_second_user(
-            self, email="test2@test.com", password="test_password"):
-        """Method to login a test user"""
-        log_user_data = {
-            'email': email,
-            'password': password
-        }
-
-        return self.client.post(
-            '/api/v1/auth/login',
-            data=log_user_data
-        )
+        results = json.loads(res.data.decode())
+        shoppinglist = results['shoppinglist']
+        self.shoppinglist_id = shoppinglist['uuid']
