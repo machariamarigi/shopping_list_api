@@ -58,8 +58,8 @@ Application Programming Interface for a shoppinglist app.
     ```
 * Run Migrations to setup the database
     ```
-    flask db migrate
-    flask db upgrade
+    python run.py database migrate
+    python run.py database upgrade
     ```
 
 ## Testing
