@@ -96,23 +96,17 @@ class Shoppinglists(Resource):
             }
             return response, 400
 
-        try:
-            shoppinglist = Shoppinglist(name=name, created_by=user_id)
-            shoppinglist.save()
-            data = shoppinglist.serialize()
-            sh_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Shopping List created",
-                "shoppinglist": json.loads(sh_json)
-            }
-            return response, 201
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        shoppinglist = Shoppinglist(name=name, created_by=user_id)
+        shoppinglist.save()
+        data = shoppinglist.serialize()
+        sh_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Shopping List created",
+            "shoppinglist": json.loads(sh_json)
+        }
+        return response, 201
 
     @token_required
     def get(self, user_id):
@@ -217,23 +211,17 @@ class SingleShoppinglist(Resource):
                 }
                 return response, 400
 
-        try:
-            shoppinglist.name = name
-            shoppinglist.save()
-            data = shoppinglist.serialize()
-            sh_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Shopping List updated!",
-                "shoppinglist": json.loads(sh_json)
-            }
-            return response, 200
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        shoppinglist.name = name
+        shoppinglist.save()
+        data = shoppinglist.serialize()
+        sh_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Shopping List updated!",
+            "shoppinglist": json.loads(sh_json)
+        }
+        return response, 200
 
     @token_required
     def delete(self, user_id, list_id):
@@ -322,24 +310,18 @@ class Items(Resource):
             }
             return response, 400
 
-        try:
-            item = Shoppingitem(
-                name=name, quantity=quantity, shoppinglist=list_id)
-            item.save()
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Shopping List created",
-                "item": json.loads(item_json)
-            }
-            return response, 201
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        item = Shoppingitem(
+            name=name, quantity=quantity, shoppinglist=list_id)
+        item.save()
+        data = item.serialize()
+        item_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Shopping List created",
+            "item": json.loads(item_json)
+        }
+        return response, 201
 
     @token_required
     def get(self, user_id, list_id):
@@ -473,24 +455,18 @@ class SingleItem(Resource):
                 }
                 return response, 400
 
-        try:
-            item.name = name
-            item.quantity = quantity
-            item.save()
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Item updated!",
-                "item": json.loads(item_json)
-            }
-            return response, 200
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        item.name = name
+        item.quantity = quantity
+        item.save()
+        data = item.serialize()
+        item_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Item updated!",
+            "item": json.loads(item_json)
+        }
+        return response, 200
 
     @token_required
     def patch(self, user_id, list_id, item_id):
@@ -516,23 +492,17 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        try:
-            item.bought = True
-            item.save()
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Item bought!",
-                "item": json.loads(item_json)
-            }
-            return response, 200
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        item.bought = True
+        item.save()
+        data = item.serialize()
+        item_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Item bought!",
+            "item": json.loads(item_json)
+        }
+        return response, 200
 
     @token_required
     def delete(self, user_id, list_id, item_id):
