@@ -9,9 +9,6 @@ class Config(object):
     CSRF_ENABLED = True
     SECRET_KEY = os.getenv('secret')
     SWAGGER_UI_DOC_EXPANSION = 'list'
-    RESTPLUS_VALIDATE = True
-    RESTPLUS_MASK_SWAGGER = False
-    ERROR_404_HELP = False
 
 
 class DevelopmentConfig(Config):
