@@ -17,13 +17,6 @@ register_args_model = auth.model(
         'username': fields.String(required=True, default="user_example"),
     }
 )
-register_response_model = auth.model(
-    'Register_response',
-    {
-        'message': fields.String,
-        'status': fields.String,
-    }
-)
 
 parser1 = reqparse.RequestParser()
 parser2 = reqparse.RequestParser()
@@ -34,7 +27,6 @@ class Registration(Resource):
     """Class to handle registering of new users"""
 
     @auth.expect(register_args_model)
-    @auth.marshal_with(register_response_model)
     def post(self):
         """
             Handle registering of users.
@@ -114,20 +106,12 @@ login_args_model = auth.model(
     }
 )
 
-login_response_model = auth.model(
-    'login_repsonse', {
-        'message': fields.String,
-        'status': fields.String,
-        'token': fields.String(default="No Token"),
-    })
-
 
 @auth.route("/login", endpoint='login')
 class Login(Resource):
     """Class to login registered users."""
 
     @auth.expect(login_args_model)
-    @auth.marshal_with(login_response_model)
     def post(self):
         """
             Handle logging in of registered users.

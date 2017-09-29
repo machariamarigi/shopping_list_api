@@ -30,5 +30,4 @@ def create_app(environment):
     from api_v1 import endpoints
     Api_V1.add_namespace(endpoints.sh_ns)
 
-
     return app
