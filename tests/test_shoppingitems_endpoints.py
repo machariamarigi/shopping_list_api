@@ -95,6 +95,24 @@ class ShoppinglistTestCase(TestBase):
         self.assertEqual(res.status_code, 200)
         self.assertIn('Hammer', str(res.data))
 
+    def test_get_query_items(self):
+        """Test if API can get items of a shoppinglist via a query term"""
+        self.create_shoppinglist()
+
+        res = self.client.post(
+            '/api/v1/shoppinglist/{}/items'.format(self.shoppinglist_id),
+            headers=dict(Authorization=self.access_token),
+            data=self.item
+        )
+        self.assertEqual(res.status_code, 201)
+
+        res = self.client.get(
+            '/api/v1/shoppinglist/{}/items?q=ham'.format(self.shoppinglist_id),
+            headers=dict(Authorization=self.access_token)
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Hammer', str(res.data))
+
     def test_get_an_item_by_id(self):
         """Test if API can get a single item based on a given ID"""
         self.create_shoppinglist()

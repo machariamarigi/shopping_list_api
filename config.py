@@ -6,6 +6,7 @@ import os
 class Config(object):
     """Common configurations"""
     SQLALCHEMY_DATABASE_URI = os.getenv('db_url')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
     CSRF_ENABLED = True
     SECRET_KEY = os.getenv('secret')
     SWAGGER_UI_DOC_EXPANSION = 'list'

@@ -13,15 +13,18 @@ def produce_error(error, code):
 
 
 @api_v1.app_errorhandler(403)
-def forbidden(e):
+def forbidden(err):
+    """Change forbidden html errors to JSON"""
     return produce_error('forbidden', code=403)
 
 
 @api_v1.app_errorhandler(404)
-def page_not_found(e):
-        return produce_error("not found", code=404)
+def page_not_found(err):
+    """Change not found html errors to JSON"""
+    return produce_error("not found", code=404)
 
 
 @api_v1.app_errorhandler(500)
-def server_errror(e):
+def server_errror(err):
+    """Change server html errors to JSON"""
     return produce_error('server error', code=500)

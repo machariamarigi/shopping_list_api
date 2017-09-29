@@ -18,6 +18,14 @@ register_args_model = auth.model(
     }
 )
 
+login_args_model = auth.model(
+    'login_args_model',
+    {
+        'email': fields.String(required=True, default="user@example.com"),
+        'password': fields.String(required=True, default="password_example")
+    }
+)
+
 parser1 = reqparse.RequestParser()
 parser2 = reqparse.RequestParser()
 
@@ -90,15 +98,6 @@ class Registration(Resource):
                 'status': 'Registration failed'
             }
             return response, 400
-
-
-login_args_model = auth.model(
-    'login_args_model',
-    {
-        'email': fields.String(required=True, default="user@example.com"),
-        'password': fields.String(required=True, default="password_example")
-    }
-)
 
 
 @auth.route("/login", endpoint='login')

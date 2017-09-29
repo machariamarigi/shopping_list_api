@@ -49,6 +49,24 @@ shoppinglist_model = sh_ns.model('ShoppingList', {
     'name': fields.String(required=True, default="Groceries")
 })
 
+item_model = sh_ns.model(
+    'Item', {
+        'name': fields.String(required=True, default="Carrots"),
+        'quantity': fields.Integer(required=True, default=1)
+    }
+)
+
+paginate_query_arguments = reqparse.RequestParser()
+paginate_query_arguments.add_argument(
+    'q', type=str, required=False, help="Search for"
+)
+paginate_query_arguments.add_argument(
+    'page', type=int, required=False, help="pages of results"
+)
+paginate_query_arguments.add_argument(
+    'limit', type=int, required=False, help="limit per page"
+)
+
 
 @sh_ns.header(
     "Authorization",
@@ -109,15 +127,41 @@ class Shoppinglists(Resource):
         return response, 201
 
     @token_required
+    @sh_ns.expect(paginate_query_arguments)
     def get(self, user_id):
         """
             Handle getting of all shoppinglists for an authorized user.
             Resource Url --> /api/v1/shoppinglists
         """
+
+        args = paginate_query_arguments.parse_args(request)
+        search_query = args.get("q")
+        page = args.get('page', 1)
+        per_page = args.get('limit', 10)
+
+        if search_query:
+            shoppinglists = Shoppinglist.query.filter(
+                Shoppinglist.name.ilike('%' + search_query + '%'))
+            results = []
+
+            for shoppinglist in shoppinglists:
+                data = shoppinglist.serialize()
+                sh_json = json.dumps(
+                    data, default=datetimeconverter, sort_keys=True
+                )
+                results.append(json.loads(sh_json))
+
+            response = {
+                "message": "Users shoppinglists found!",
+                "shoppinglists": results
+            }
+            return response, 200
+
         shoppinglists = Shoppinglist.query.filter_by(created_by=user_id)
+        paginate_shoppinglists = shoppinglists.paginate(page, per_page, True)
         results = []
 
-        for shoppinglist in shoppinglists:
+        for shoppinglist in paginate_shoppinglists.items:
             data = shoppinglist.serialize()
             sh_json = json.dumps(
                 data, default=datetimeconverter, sort_keys=True
@@ -166,6 +210,7 @@ class SingleShoppinglist(Resource):
         return response, 200
 
     @token_required
+    @sh_ns.expect(shoppinglist_model)
     def put(self, user_id, list_id):
         """
             Handle updating of a shoppinglist for an authorized user via an id
@@ -246,14 +291,6 @@ class SingleShoppinglist(Resource):
         return response, 200
 
 
-item_model = sh_ns.model(
-    'Item', {
-        'name': fields.String(required=True, default="Carrots"),
-        'quantity': fields.Integer(required=True, default=1)
-    }
-)
-
-
 @sh_ns.header(
     "Authorization",
     description="JWT token for authenticationg users",
@@ -324,16 +361,42 @@ class Items(Resource):
         return response, 201
 
     @token_required
+    @sh_ns.expect(paginate_query_arguments)
     def get(self, user_id, list_id):
         """
             Handle getting of all items for a shoppinglist.
             Resource Url --> /api/v1/shoppinglist/<int:list_id>/items
         """
         del user_id
+
+        args = paginate_query_arguments.parse_args(request)
+        search_query = args.get("q")
+        page = args.get('page', 1)
+        per_page = args.get('limit', 10)
+
+        if search_query:
+            items = Shoppingitem.query.filter(
+                Shoppingitem.name.ilike('%' + search_query + '%'))
+            results = []
+
+            for item in items:
+                data = item.serialize()
+                item_json = json.dumps(
+                    data, default=datetimeconverter, sort_keys=True
+                )
+                results.append(json.loads(item_json))
+
+            response = {
+                "message": "Users shoppinglists found!",
+                "shoppinglists": results
+            }
+            return response, 200
+
         items = Shoppingitem.query.filter_by(shoppinglist=list_id)
+        paginate_items = items.paginate(page, per_page, True)
         results = []
 
-        for item in items:
+        for item in paginate_items.items:
             data = item.serialize()
             item_json = json.dumps(
                 data, default=datetimeconverter, sort_keys=True
@@ -392,6 +455,7 @@ class SingleItem(Resource):
         return response, 200
 
     @token_required
+    @sh_ns.expect(item_model)
     def put(self, user_id, list_id, item_id):
         """
             Handle editing of an item in a shopping list via an id
