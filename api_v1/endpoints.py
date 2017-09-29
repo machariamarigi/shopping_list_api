@@ -95,9 +95,10 @@ class Shoppinglists(Resource):
         args = parser.parse_args()
         name = args['name']
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for shopping list names",
+                "message": message + " for shopping list names",
                 "shoppinglist": "null"
             }
             return response, 400
@@ -237,9 +238,10 @@ class SingleShoppinglist(Resource):
             }
             return response, 404
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for shopping list names",
+                "message": message + " for shopping list names",
                 "shoppinglist": "null"
             }
             return response, 400
@@ -328,10 +330,11 @@ class Items(Resource):
         name = args['name']
         quantity = args['quantity']
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for item names",
-                "item": "null"
+                "message": message + " for item names",
+                "shoppinglist": "null"
             }
             return response, 400
 
@@ -500,10 +503,11 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for item names",
-                "item": "null"
+                "message": message + " for item names",
+                "shoppinglist": "null"
             }
             return response, 400
 
