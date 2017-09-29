@@ -18,6 +18,14 @@ register_args_model = auth.model(
     }
 )
 
+login_args_model = auth.model(
+    'login_args_model',
+    {
+        'email': fields.String(required=True, default="user@example.com"),
+        'password': fields.String(required=True, default="password_example")
+    }
+)
+
 parser1 = reqparse.RequestParser()
 parser2 = reqparse.RequestParser()
 
@@ -75,19 +83,13 @@ class Registration(Resource):
         user_email = User.query.filter_by(email=email).first()
 
         if not user_email:
-            try:
-                user = User(email=email, password=password, username=username)
-                user.save()
-                response = {
-                    'message': 'Registered successfully, please log in.',
-                    'status': 'Registered'
-                }
-                return response, 201
-            except Exception as e:
-                response = {
-                    'message': str(e)
-                }
-                return response, 500
+            user = User(email=email, password=password, username=username)
+            user.save()
+            response = {
+                'message': 'Registered successfully, please log in.',
+                'status': 'Registered'
+            }
+            return response, 201
         else:
             messg = 'Email already used.' \
                     ' Try another one or login if you are already registered'
@@ -96,15 +98,6 @@ class Registration(Resource):
                 'status': 'Registration failed'
             }
             return response, 400
-
-
-login_args_model = auth.model(
-    'login_args_model',
-    {
-        'email': fields.String(required=True, default="user@example.com"),
-        'password': fields.String(required=True, default="password_example")
-    }
-)
 
 
 @auth.route("/login", endpoint='login')
@@ -131,26 +124,19 @@ class Login(Resource):
 
         args2 = parser2.parse_args()
 
-        try:
-            user = User.query.filter_by(email=args2['email']).first()
-            if user and user.authenticate_password(args2['password']):
-                access_token = user.generate_token(user.uuid)
-                if access_token:
-                    response = {
-                        'message': 'You logged in successfully.',
-                        'status': 'Logged in!',
-                        'token': access_token.decode()
-                    }
-                    return response, 200
-            else:
+        user = User.query.filter_by(email=args2['email']).first()
+        if user and user.authenticate_password(args2['password']):
+            access_token = user.generate_token(user.uuid)
+            if access_token:
                 response = {
-                    'message': 'Invalid email or password, Please try again',
-                    'status': 'Login Failed'
+                    'message': 'You logged in successfully.',
+                    'status': 'Logged in!',
+                    'token': access_token.decode()
                 }
-                return response, 401
-
-        except Exception as e:
+                return response, 200
+        else:
             response = {
-                'message': str(e)
-            },
-            return response, 500
+                'message': 'Invalid email or password, Please try again',
+                'status': 'Login Failed'
+            }
+            return response, 401

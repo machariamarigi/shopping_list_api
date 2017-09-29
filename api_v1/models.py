@@ -70,22 +70,19 @@ class User(BaseModel):
 
     def generate_token(self, user_id):
         """Generate the access token"""
-        try:
-            payload = {
-                'exp': datetime.utcnow() + timedelta(minutes=5),
-                'iat': datetime.utcnow(),
-                'sub': user_id
-            }
+        payload = {
+            'exp': datetime.utcnow() + timedelta(minutes=5),
+            'iat': datetime.utcnow(),
+            'sub': user_id
+        }
 
-            jwt_string = jwt.encode(
-                payload,
-                current_app.config.get('SECRET_KEY'),
-                algorithm='HS256'
-            )
+        jwt_string = jwt.encode(
+            payload,
+            current_app.config.get('SECRET_KEY'),
+            algorithm='HS256'
+        )
 
-            return jwt_string
-        except Exception as excep:
-            return str(excep)
+        return jwt_string
 
     @staticmethod
     def decode_token(token):

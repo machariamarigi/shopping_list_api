@@ -88,7 +88,7 @@ class ShoppinglistTestCase(TestBase):
         )
 
     def test_get_all_shoppinglists(self):
-        """Test if API can get all shoppinglist"""
+        """Test if API can get all shoppinglists"""
         self.get_access_token()
 
         res = self.client.post(
@@ -100,6 +100,23 @@ class ShoppinglistTestCase(TestBase):
 
         res = self.client.get(
             '/api/v1/shoppinglists',
+            headers=dict(Authorization=self.access_token)
+        )
+        self.assertEqual(res.status_code, 200)
+        self.assertIn('Hardware', str(res.data))
+
+    def test_get_query_shoppinglists(self):
+        """Test if API can get shoppinglists via a query"""
+        self.get_access_token()
+
+        res = self.client.post(
+            '/api/v1/shoppinglists',
+            headers=dict(Authorization=self.access_token),
+            data=self.shoppinglist
+        )
+
+        res = self.client.get(
+            '/api/v1/shoppinglists?q=hardw',
             headers=dict(Authorization=self.access_token)
         )
         self.assertEqual(res.status_code, 200)

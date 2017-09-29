@@ -78,14 +78,22 @@ Application Programming Interface for a shoppinglist app.
 
 #### Endpoints
 
-| Resource URL                                |      Methods      |        Description        | Requires Token |
-|---------------------------------------------|-------------------|---------------------------|----------------|  
-| /api/v1/auth/register/                      |       POST        |       User registers      | FALSE          |
-| /api/v1/auth/login/                         |       POST        |         User login        | FALSE          |
+| Resource URL                                 |      Methods      |        Description              | Requires Token |
+|----------------------------------------------|-------------------|---------------------------------|----------------|
+| /api/v1/auth/register                        |POST               |User registers                   |FALSE           |
+| /api/v1/auth/login                           |POST               |User login                       |FALSE           |
+| /api/v1/shoppinglists                        |POST               |Create shopping lists            |TRUE            |
+| /api/v1/shoppinglists                        |GET                |List shopping lists              |TRUE            |
+| /api/v1/shoppinglist/<list_id>               |GET                |List a single shopping list      |TRUE            |
+| /api/v1/shoppinglist/<list_id>               |PUT                |Edit a single shopping list      |TRUE            |
+| /api/v1/shoppinglist/<list_id>               |DELETE             |Delete a single shopping list    |TRUE            |
+| /api/v1/shoppinglist/<list_id>/items         |POST               |Create items in a shopping list  |TRUE            |
+| /api/v1/shoppinglist/<list_id>/items         |GET                |List items in a shopping list    |TRUE            |
+| /api/v1/shoppinglist/<list_id>/item/<item_id>|GET                |List an item in a shopping list  |TRUE            |
+| /api/v1/shoppinglist/<list_id>/item/<item_id>|PUT                |Edit an item in a shopping list  |TRUE            |
+| /api/v1/shoppinglist/<list_id>/item/<item_id>|PATCH              |Buy an item in a shopping list   |TRUE            |
+| /api/v1/shoppinglist/<list_id>/item/<item_id>|DELETE             |Delete an item in a shopping list|TRUE            |
 
-```
-More to Come
-```
 
 ## Authors
 [Macharia Marigi](https://github.com/machariamarigi)

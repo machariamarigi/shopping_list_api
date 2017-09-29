@@ -49,6 +49,24 @@ shoppinglist_model = sh_ns.model('ShoppingList', {
     'name': fields.String(required=True, default="Groceries")
 })
 
+item_model = sh_ns.model(
+    'Item', {
+        'name': fields.String(required=True, default="Carrots"),
+        'quantity': fields.Integer(required=True, default=1)
+    }
+)
+
+paginate_query_arguments = reqparse.RequestParser()
+paginate_query_arguments.add_argument(
+    'q', type=str, required=False, help="Search for"
+)
+paginate_query_arguments.add_argument(
+    'page', type=int, required=False, help="pages of results"
+)
+paginate_query_arguments.add_argument(
+    'limit', type=int, required=False, help="limit per page"
+)
+
 
 @sh_ns.header(
     "Authorization",
@@ -77,9 +95,10 @@ class Shoppinglists(Resource):
         args = parser.parse_args()
         name = args['name']
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for shopping list names",
+                "message": message + " for shopping list names",
                 "shoppinglist": "null"
             }
             return response, 400
@@ -96,34 +115,54 @@ class Shoppinglists(Resource):
             }
             return response, 400
 
-        try:
-            shoppinglist = Shoppinglist(name=name, created_by=user_id)
-            shoppinglist.save()
-            data = shoppinglist.serialize()
-            sh_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Shopping List created",
-                "shoppinglist": json.loads(sh_json)
-            }
-            return response, 201
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        shoppinglist = Shoppinglist(name=name, created_by=user_id)
+        shoppinglist.save()
+        data = shoppinglist.serialize()
+        sh_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Shopping List created",
+            "shoppinglist": json.loads(sh_json)
+        }
+        return response, 201
 
     @token_required
+    @sh_ns.expect(paginate_query_arguments)
     def get(self, user_id):
         """
             Handle getting of all shoppinglists for an authorized user.
             Resource Url --> /api/v1/shoppinglists
         """
+
+        args = paginate_query_arguments.parse_args(request)
+        search_query = args.get("q")
+        page = args.get('page', 1)
+        per_page = args.get('limit', 10)
+
+        if search_query:
+            shoppinglists = Shoppinglist.query.filter(
+                Shoppinglist.name.ilike('%' + search_query + '%'))
+            results = []
+
+            for shoppinglist in shoppinglists:
+                data = shoppinglist.serialize()
+                sh_json = json.dumps(
+                    data, default=datetimeconverter, sort_keys=True
+                )
+                results.append(json.loads(sh_json))
+
+            response = {
+                "message": "Users shoppinglists found!",
+                "shoppinglists": results
+            }
+            return response, 200
+
         shoppinglists = Shoppinglist.query.filter_by(created_by=user_id)
+        paginate_shoppinglists = shoppinglists.paginate(page, per_page, True)
         results = []
 
-        for shoppinglist in shoppinglists:
+        for shoppinglist in paginate_shoppinglists.items:
             data = shoppinglist.serialize()
             sh_json = json.dumps(
                 data, default=datetimeconverter, sort_keys=True
@@ -172,6 +211,7 @@ class SingleShoppinglist(Resource):
         return response, 200
 
     @token_required
+    @sh_ns.expect(shoppinglist_model)
     def put(self, user_id, list_id):
         """
             Handle updating of a shoppinglist for an authorized user via an id
@@ -198,9 +238,10 @@ class SingleShoppinglist(Resource):
             }
             return response, 404
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for shopping list names",
+                "message": message + " for shopping list names",
                 "shoppinglist": "null"
             }
             return response, 400
@@ -217,23 +258,17 @@ class SingleShoppinglist(Resource):
                 }
                 return response, 400
 
-        try:
-            shoppinglist.name = name
-            shoppinglist.save()
-            data = shoppinglist.serialize()
-            sh_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Shopping List updated!",
-                "shoppinglist": json.loads(sh_json)
-            }
-            return response, 200
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        shoppinglist.name = name
+        shoppinglist.save()
+        data = shoppinglist.serialize()
+        sh_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Shopping List updated!",
+            "shoppinglist": json.loads(sh_json)
+        }
+        return response, 200
 
     @token_required
     def delete(self, user_id, list_id):
@@ -256,14 +291,6 @@ class SingleShoppinglist(Resource):
             "message": message
         }
         return response, 200
-
-
-item_model = sh_ns.model(
-    'Item', {
-        'name': fields.String(required=True, default="Carrots"),
-        'quantity': fields.Integer(required=True, default=1)
-    }
-)
 
 
 @sh_ns.header(
@@ -303,10 +330,11 @@ class Items(Resource):
         name = args['name']
         quantity = args['quantity']
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for item names",
-                "item": "null"
+                "message": message + " for item names",
+                "shoppinglist": "null"
             }
             return response, 400
 
@@ -322,36 +350,56 @@ class Items(Resource):
             }
             return response, 400
 
-        try:
-            item = Shoppingitem(
-                name=name, quantity=quantity, shoppinglist=list_id)
-            item.save()
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Shopping List created",
-                "item": json.loads(item_json)
-            }
-            return response, 201
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        item = Shoppingitem(
+            name=name, quantity=quantity, shoppinglist=list_id)
+        item.save()
+        data = item.serialize()
+        item_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Shopping List created",
+            "item": json.loads(item_json)
+        }
+        return response, 201
 
     @token_required
+    @sh_ns.expect(paginate_query_arguments)
     def get(self, user_id, list_id):
         """
             Handle getting of all items for a shoppinglist.
             Resource Url --> /api/v1/shoppinglist/<int:list_id>/items
         """
         del user_id
+
+        args = paginate_query_arguments.parse_args(request)
+        search_query = args.get("q")
+        page = args.get('page', 1)
+        per_page = args.get('limit', 10)
+
+        if search_query:
+            items = Shoppingitem.query.filter(
+                Shoppingitem.name.ilike('%' + search_query + '%'))
+            results = []
+
+            for item in items:
+                data = item.serialize()
+                item_json = json.dumps(
+                    data, default=datetimeconverter, sort_keys=True
+                )
+                results.append(json.loads(item_json))
+
+            response = {
+                "message": "Users shoppinglists found!",
+                "shoppinglists": results
+            }
+            return response, 200
+
         items = Shoppingitem.query.filter_by(shoppinglist=list_id)
+        paginate_items = items.paginate(page, per_page, True)
         results = []
 
-        for item in items:
+        for item in paginate_items.items:
             data = item.serialize()
             item_json = json.dumps(
                 data, default=datetimeconverter, sort_keys=True
@@ -410,6 +458,7 @@ class SingleItem(Resource):
         return response, 200
 
     @token_required
+    @sh_ns.expect(item_model)
     def put(self, user_id, list_id, item_id):
         """
             Handle editing of an item in a shopping list via an id
@@ -454,10 +503,11 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        if not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
+            message = "Name shouldn't be empty. No special characters"
             response = {
-                "message": "No special characters for item names",
-                "item": "null"
+                "message": message + " for item names",
+                "shoppinglist": "null"
             }
             return response, 400
 
@@ -473,24 +523,18 @@ class SingleItem(Resource):
                 }
                 return response, 400
 
-        try:
-            item.name = name
-            item.quantity = quantity
-            item.save()
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Item updated!",
-                "item": json.loads(item_json)
-            }
-            return response, 200
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        item.name = name
+        item.quantity = quantity
+        item.save()
+        data = item.serialize()
+        item_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Item updated!",
+            "item": json.loads(item_json)
+        }
+        return response, 200
 
     @token_required
     def patch(self, user_id, list_id, item_id):
@@ -516,23 +560,17 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        try:
-            item.bought = True
-            item.save()
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
-            response = {
-                "message": "Item bought!",
-                "item": json.loads(item_json)
-            }
-            return response, 200
-        except Exception as e:
-            response = {
-                'message': str(e)
-            }
-            return response, 500
+        item.bought = True
+        item.save()
+        data = item.serialize()
+        item_json = json.dumps(
+            data, default=datetimeconverter, sort_keys=True
+        )
+        response = {
+            "message": "Item bought!",
+            "item": json.loads(item_json)
+        }
+        return response, 200
 
     @token_required
     def delete(self, user_id, list_id, item_id):
