@@ -8,6 +8,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.getenv('db_url')
     CSRF_ENABLED = True
     SECRET_KEY = os.getenv('secret')
+    SWAGGER_UI_DOC_EXPANSION = 'list'
 
 
 class DevelopmentConfig(Config):
