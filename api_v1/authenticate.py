@@ -24,7 +24,8 @@ class Registration(Resource):
         email = args['email']
         password = args['password']
 
-        if len(name.strip()) == 0 or not re.match("^[a-zA-Z0-9_]*$", username):
+        if len(username.strip()) == 0 or not re.match(
+                "^[a-zA-Z0-9_]*$", username):
             response = {
                 'message': 'Username cannot contain special characters.',
                 'status': 'Registration failed'
