@@ -1,33 +1,12 @@
 """This module contains registration and login features."""
 import re
 
-from flask_restplus import Namespace, Resource, reqparse, fields
+from flask_restplus import Resource
 
+from api_v1 import auth
 from api_v1.models import User
-
-auth = Namespace(
-    "Auth", description='Operations related to Authentication', path='/auth')
-
-
-register_args_model = auth.model(
-    'registration_args',
-    {
-        'email': fields.String(required=True, default="user@example.com"),
-        'password': fields.String(required=True, default="password_example"),
-        'username': fields.String(required=True, default="user_example"),
-    }
-)
-
-login_args_model = auth.model(
-    'login_args_model',
-    {
-        'email': fields.String(required=True, default="user@example.com"),
-        'password': fields.String(required=True, default="password_example")
-    }
-)
-
-parser1 = reqparse.RequestParser()
-parser2 = reqparse.RequestParser()
+from api_v1.serializers import register_args_model, login_args_model
+from api_v1.parsers import registration_parser, login_parser
 
 
 @auth.route("/register", endpoint='register')
@@ -40,28 +19,13 @@ class Registration(Resource):
             Handle registering of users.
             Resource Url --> /api/v1/auth/register
         """
-
-        parser1.add_argument(
-            'username',
-            required=True,
-            help='required and must be a string'
-        )
-        parser1.add_argument(
-            'email',
-            required=True,
-            help='required and must be a string'
-        )
-        parser1.add_argument(
-            'password',
-            required=True,
-            help='required and must be a string'
-        )
-        args = parser1.parse_args()
+        args = registration_parser.parse_args()
         username = args['username']
         email = args['email']
         password = args['password']
 
-        if not re.match("^[a-zA-Z0-9_]*$", username):
+        if len(username.strip()) == 0 or not re.match(
+                "^[a-zA-Z0-9_]*$", username):
             response = {
                 'message': 'Username cannot contain special characters.',
                 'status': 'Registration failed'
@@ -111,21 +75,10 @@ class Login(Resource):
             Resource Url --> /api/v1/auth/login
         """
 
-        parser2.add_argument(
-            'email',
-            required=True,
-            help='required and must be a string'
-        )
-        parser2.add_argument(
-            'password',
-            required=True,
-            help='required and must be a string'
-        )
+        args = login_parser.parse_args()
 
-        args2 = parser2.parse_args()
-
-        user = User.query.filter_by(email=args2['email']).first()
-        if user and user.authenticate_password(args2['password']):
+        user = User.query.filter_by(email=args['email']).first()
+        if user and user.authenticate_password(args['password']):
             access_token = user.generate_token(user.uuid)
             if access_token:
                 response = {
