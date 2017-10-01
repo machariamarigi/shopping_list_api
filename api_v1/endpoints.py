@@ -9,6 +9,7 @@ from flask_restplus import Namespace, fields, Resource, reqparse
 from sqlalchemy import func
 
 from api_v1.models import Shoppinglist, Shoppingitem, User
+from api_v1.helpers import name_validalidation
 
 
 def datetimeconverter(obj):
@@ -95,13 +96,9 @@ class Shoppinglists(Resource):
         args = parser.parse_args()
         name = args['name']
 
-        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
-            message = "Name shouldn't be empty. No special characters"
-            response = {
-                "message": message + " for shopping list names",
-                "shoppinglist": "null"
-            }
-            return response, 400
+        validation_name = name_validalidation(name, "shopping list")
+        if validation_name:
+            return validation_name
 
         existing_shoppinglist = Shoppinglist.query.filter(
             func.lower(Shoppinglist.name) == name.lower(),
@@ -238,13 +235,9 @@ class SingleShoppinglist(Resource):
             }
             return response, 404
 
-        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
-            message = "Name shouldn't be empty. No special characters"
-            response = {
-                "message": message + " for shopping list names",
-                "shoppinglist": "null"
-            }
-            return response, 400
+        validation_name = name_validalidation(name, "shopping list")
+        if validation_name:
+            return validation_name
 
         existing_shoppinglist = Shoppinglist.query.filter(
             func.lower(Shoppinglist.name) == name.lower(),
@@ -330,13 +323,9 @@ class Items(Resource):
         name = args['name']
         quantity = args['quantity']
 
-        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
-            message = "Name shouldn't be empty. No special characters"
-            response = {
-                "message": message + " for item names",
-                "shoppinglist": "null"
-            }
-            return response, 400
+        validation_name = name_validalidation(name, "item")
+        if validation_name:
+            return validation_name
 
         existing_item = Shoppingitem.query.filter(
             func.lower(Shoppingitem.name) == name.lower(),
@@ -503,13 +492,9 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
-            message = "Name shouldn't be empty. No special characters"
-            response = {
-                "message": message + " for item names",
-                "shoppinglist": "null"
-            }
-            return response, 400
+        validation_name = name_validalidation(name, "item")
+        if validation_name:
+            return validation_name
 
         existing_item = Shoppingitem.query.filter(
             func.lower(Shoppingitem.name) == name.lower(),
