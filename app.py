@@ -27,7 +27,7 @@ def create_app(environment):
     from api_v1 import authenticate
     Api_V1.add_namespace(authenticate.auth)
 
-    from api_v1 import endpoints
-    Api_V1.add_namespace(endpoints.sh_ns)
+    from api_v1 import shopping_endpoints
+    Api_V1.add_namespace(shopping_endpoints.sh_ns)
 
     return app
