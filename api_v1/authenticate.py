@@ -3,8 +3,8 @@ import re
 
 from flask_restplus import Resource
 
-from api_v1.models import User
 from api_v1 import auth
+from api_v1.models import User
 from api_v1.serializers import register_args_model, login_args_model
 from api_v1.parsers import registration_parser, login_parser
 

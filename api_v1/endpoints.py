@@ -1,72 +1,17 @@
 """This module contains the API endpoints in regards to the shopping lists"""
-import datetime
 import json
-import re
-from functools import wraps
 
 from flask import request
-from flask_restplus import Namespace, fields, Resource, reqparse
+from flask_restplus import Resource
 from sqlalchemy import func
 
-from api_v1.models import Shoppinglist, Shoppingitem, User
-from api_v1.helpers import name_validalidation
-
-
-def datetimeconverter(obj):
-    """Function to convert datime objects to a string"""
-    if isinstance(obj, datetime.datetime):
-        return obj.__str__()
-
-
-def token_required(funct):
-    """Decorator method to check for jwt tokens"""
-    @wraps(funct)
-    def wrapper(*args, **kwargs):
-        """Wrapper function to add pass down results of the token decoding"""
-        if 'Authorization' in request.headers:
-            access_token = request.headers.get('Authorization')
-
-            data = User.decode_token(access_token)
-            if not isinstance(data, str):
-                user_id = data
-            else:
-                response = {
-                    'message': data
-                }
-                return response, 401
-
-            return funct(*args, user_id, **kwargs)
-    wrapper.__doc__ = funct.__doc__
-    wrapper.__name__ = funct.__name__
-    return wrapper
-
-sh_ns = Namespace(
-    "Shoppinglist Endpoints",
-    description="Operations related to Shoppinglists and Items",
-    path="/"
-)
-
-shoppinglist_model = sh_ns.model('ShoppingList', {
-    'name': fields.String(required=True, default="Groceries")
-})
-
-item_model = sh_ns.model(
-    'Item', {
-        'name': fields.String(required=True, default="Carrots"),
-        'quantity': fields.Integer(required=True, default=1)
-    }
-)
-
-paginate_query_arguments = reqparse.RequestParser()
-paginate_query_arguments.add_argument(
-    'q', type=str, required=False, help="Search for"
-)
-paginate_query_arguments.add_argument(
-    'page', type=int, required=False, help="pages of results"
-)
-paginate_query_arguments.add_argument(
-    'limit', type=int, required=False, help="limit per page"
-)
+from api_v1 import sh_ns
+from api_v1.serializers import shoppinglist_model, item_model
+from api_v1.models import Shoppinglist, Shoppingitem
+from api_v1.helpers import (name_validalidation, datetimeconverter,
+                            token_required)
+from api_v1.parsers import (shoppinglist_parser, paginate_query_parser,
+                            item_parser)
 
 
 @sh_ns.header(
@@ -85,15 +30,8 @@ class Shoppinglists(Resource):
             Handle posting of new shoppinglists for an authorized user.
             Resource Url --> /api/v1/shoppinglists
         """
-        parser = reqparse.RequestParser()
 
-        parser.add_argument(
-            'name',
-            required=True,
-            help="Required and must be a string"
-        )
-
-        args = parser.parse_args()
+        args = shoppinglist_parser.parse_args()
         name = args['name']
 
         validation_name = name_validalidation(name, "shopping list")
@@ -125,14 +63,14 @@ class Shoppinglists(Resource):
         return response, 201
 
     @token_required
-    @sh_ns.expect(paginate_query_arguments)
+    @sh_ns.expect(paginate_query_parser)
     def get(self, user_id):
         """
             Handle getting of all shoppinglists for an authorized user.
             Resource Url --> /api/v1/shoppinglists
         """
 
-        args = paginate_query_arguments.parse_args(request)
+        args = paginate_query_parser.parse_args(request)
         search_query = args.get("q")
         page = args.get('page', 1)
         per_page = args.get('limit', 10)
@@ -215,15 +153,7 @@ class SingleShoppinglist(Resource):
             Resource Url --> /api/v1/shoppinglist/<list_id>
         """
 
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            'name',
-            required=True,
-            help="Required and must be a string"
-        )
-
-        args = parser.parse_args()
+        args = shoppinglist_parser.parse_args()
         name = args['name']
 
         shoppinglist = Shoppinglist.query.filter_by(
@@ -303,23 +233,8 @@ class Items(Resource):
             Resource Url --> /api/v1/shoppinglist/<int:list_id>/items
         """
         del user_id
-        parser = reqparse.RequestParser()
 
-        parser.add_argument(
-            'name',
-            required=True,
-            type=str,
-            help="Required and must be a string"
-        )
-
-        parser.add_argument(
-            'quantity',
-            required=True,
-            type=int,
-            help="Required and must be an integer"
-        )
-
-        args = parser.parse_args()
+        args = item_parser.parse_args()
         name = args['name']
         quantity = args['quantity']
 
@@ -353,7 +268,7 @@ class Items(Resource):
         return response, 201
 
     @token_required
-    @sh_ns.expect(paginate_query_arguments)
+    @sh_ns.expect(paginate_query_parser)
     def get(self, user_id, list_id):
         """
             Handle getting of all items for a shoppinglist.
@@ -361,7 +276,7 @@ class Items(Resource):
         """
         del user_id
 
-        args = paginate_query_arguments.parse_args(request)
+        args = paginate_query_parser.parse_args(request)
         search_query = args.get("q")
         page = args.get('page', 1)
         per_page = args.get('limit', 10)
@@ -454,23 +369,7 @@ class SingleItem(Resource):
             Resource Url --> /api/v1/shoppinglist/<list_id>/item/<item_id>
         """
 
-        parser = reqparse.RequestParser()
-
-        parser.add_argument(
-            'name',
-            required=True,
-            type=str,
-            help="Required and must be a string"
-        )
-
-        parser.add_argument(
-            'quantity',
-            required=True,
-            type=int,
-            help="Required and must be an integer"
-        )
-
-        args = parser.parse_args()
+        args = item_parser.parse_args()
         name = args['name']
         quantity = args['quantity']
 
