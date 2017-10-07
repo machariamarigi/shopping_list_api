@@ -21,6 +21,15 @@ class ShoppinglistTestCase(TestBase):
         self.assertEqual(res.status_code, 201)
         self.assertIn('Hardware', str(res.data))
 
+    def test_shoppinglist_creation_no_token(self):
+        "Test if api cannot crate a shoppinglist without a token"
+        res = self.client.post(
+            '/api/v1/shoppinglists',
+            data=self.shoppinglist
+        )
+        self.assertEqual(res.status_code, 401)
+        self.assertIn('No token', str(res.data))
+
     def test_invalid_token(self):
         """Test if API cannot create a shoppinglist with invalid token"""
         res = self.client.post(
@@ -33,9 +42,9 @@ class ShoppinglistTestCase(TestBase):
 
     def test_expired_token(self):
         """Test if API cannot create a shoppinglist with expired token"""
-        expired_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" \
-            ".eyJleHAiOjE1MDYzNDMyMzIsImlhdCI6MTUwNjM0MjkzMiwic3V" \
-            "iIjoxfQ.gUlwxJEfz6gAqohBZJ_eRpvlNn0ZvUT4vQ8MciZSyzU"
+        expired_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." \
+            "eyJleHAiOjE1MDczNjAzMDUsImlhdCI6MTUwNzM2MDAwNSwic3ViIjoxfQ."\
+            "dKTHv7tL6B07okJBdJcnGrNTeV5Gk4oKJ9vQFpG6MUA"
         res = self.client.post(
             '/api/v1/shoppinglists',
             headers=dict(Authorization=expired_token),
