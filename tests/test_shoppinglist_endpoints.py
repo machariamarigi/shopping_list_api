@@ -40,20 +40,6 @@ class ShoppinglistTestCase(TestBase):
         self.assertEqual(res.status_code, 401)
         self.assertIn('Invalid token. Please register or login', str(res.data))
 
-    def test_expired_token(self):
-        """Test if API cannot create a shoppinglist with expired token"""
-        expired_token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9." \
-            "eyJleHAiOjE1MDczNjAzMDUsImlhdCI6MTUwNzM2MDAwNSwic3ViIjoxfQ."\
-            "dKTHv7tL6B07okJBdJcnGrNTeV5Gk4oKJ9vQFpG6MUA"
-        res = self.client.post(
-            '/api/v1/shoppinglists',
-            headers=dict(Authorization=expired_token),
-            data=self.shoppinglist
-        )
-        self.assertEqual(res.status_code, 401)
-        self.assertIn(
-            'Expired token. Please login to get a new token', str(res.data))
-
     def test_bad_shoppinglist_name(self):
         """Test for special characters in shoppinglist names"""
 
