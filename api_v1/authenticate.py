@@ -26,8 +26,9 @@ class Registration(Resource):
 
         if len(username.strip()) == 0 or not re.match(
                 "^[a-zA-Z0-9_]*$", username):
+            message = "Username cannot be empty or"
             response = {
-                'message': 'Username cannot contain special characters.',
+                'message': message + ' contain special characters.',
                 'status': 'Registration failed'
             }
             return response, 400
