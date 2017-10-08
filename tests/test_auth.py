@@ -37,7 +37,7 @@ class AuthTestCase(TestBase):
         result = json.loads(res.data.decode())
         self.assertEqual(
             result['message'],
-            'Username cannot contain special characters.'
+            'Username cannot be empty or contain special characters.'
         )
         self.assertEqual(res.status_code, 400)
 
