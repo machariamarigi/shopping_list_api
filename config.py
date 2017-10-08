@@ -29,7 +29,7 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_DATABASE_URI = os.getenv('test_db')
+    SQLALCHEMY_DATABASE_URI = os.getenv('test_db') or 'sqlite:///:memory'
 
 
 app_config = {
