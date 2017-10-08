@@ -77,7 +77,8 @@ class Shoppinglists(Resource):
 
         if search_query:
             shoppinglists = Shoppinglist.query.filter(
-                Shoppinglist.name.ilike('%' + search_query + '%'))
+                Shoppinglist.name.ilike('%' + search_query + '%'),
+                Shoppinglist.created_by == user_id)
             results = []
 
             for shoppinglist in shoppinglists:
@@ -283,7 +284,8 @@ class Items(Resource):
 
         if search_query:
             items = Shoppingitem.query.filter(
-                Shoppingitem.name.ilike('%' + search_query + '%'))
+                Shoppingitem.name.ilike('%' + search_query + '%'),
+                Shoppingitem.shoppinglist == list_id)
             results = []
 
             for item in items:

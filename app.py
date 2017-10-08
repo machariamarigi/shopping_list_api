@@ -1,5 +1,5 @@
 """Module containing factory function for the application"""
-from flask import Flask
+from flask import Flask, redirect
 from flask_restplus import Api
 
 from config import app_config
@@ -29,5 +29,10 @@ def create_app(environment):
 
     from api_v1 import endpoints
     Api_V1.add_namespace(endpoints.sh_ns)
+
+    @app.route('/')
+    def reroute():
+        """Method to route root path to /api/v1"""
+        return redirect('/api/v1')
 
     return app

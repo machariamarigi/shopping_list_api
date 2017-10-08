@@ -43,6 +43,12 @@ def token_required(funct):
                 return response, 401
 
             return funct(*args, user_id, **kwargs)
+        else:
+            message = "No token found! Ensure that the request header"
+            response = {
+                'message': message + ' has an authorization key value'
+            }
+            return response, 401
     wrapper.__doc__ = funct.__doc__
     wrapper.__name__ = funct.__name__
     return wrapper
