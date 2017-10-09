@@ -7,9 +7,9 @@ from sqlalchemy import func
 
 from api_v1 import sh_ns
 from api_v1.serializers import shoppinglist_model, item_model
-from api_v1.models import Shoppinglist, Shoppingitem
+from api_v1.models import Shoppinglist, Shoppingitem, User
 from api_v1.helpers import (name_validalidation, datetimeconverter,
-                            token_required)
+                            token_required, master_serializer)
 from api_v1.parsers import (shoppinglist_parser, paginate_query_parser,
                             item_parser)
 
@@ -52,10 +52,7 @@ class Shoppinglists(Resource):
 
         shoppinglist = Shoppinglist(name=name, created_by=user_id)
         shoppinglist.save()
-        data = shoppinglist.serialize()
-        sh_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        sh_json = master_serializer(shoppinglist)
         response = {
             "message": "Shopping List created",
             "shoppinglist": json.loads(sh_json)
@@ -82,10 +79,7 @@ class Shoppinglists(Resource):
             results = []
 
             for shoppinglist in shoppinglists:
-                data = shoppinglist.serialize()
-                sh_json = json.dumps(
-                    data, default=datetimeconverter, sort_keys=True
-                )
+                sh_json = master_serializer(shoppinglist)
                 results.append(json.loads(sh_json))
 
             response = {
@@ -99,10 +93,7 @@ class Shoppinglists(Resource):
         results = []
 
         for shoppinglist in paginate_shoppinglists.items:
-            data = shoppinglist.serialize()
-            sh_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
+            sh_json = master_serializer(shoppinglist)
             results.append(json.loads(sh_json))
 
         response = {
@@ -136,10 +127,7 @@ class SingleShoppinglist(Resource):
             }
             return response, 404
 
-        data = shoppinglist.serialize()
-        sh_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        sh_json = master_serializer(shoppinglist)
         response = {
             "message": "Shopping list found!",
             "shoppinglist": json.loads(sh_json)
@@ -184,10 +172,7 @@ class SingleShoppinglist(Resource):
 
         shoppinglist.name = name
         shoppinglist.save()
-        data = shoppinglist.serialize()
-        sh_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        sh_json = master_serializer(shoppinglist)
         response = {
             "message": "Shopping List updated!",
             "shoppinglist": json.loads(sh_json)
@@ -258,10 +243,7 @@ class Items(Resource):
         item = Shoppingitem(
             name=name, quantity=quantity, shoppinglist=list_id)
         item.save()
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Shopping List created",
             "item": json.loads(item_json)
@@ -289,10 +271,7 @@ class Items(Resource):
             results = []
 
             for item in items:
-                data = item.serialize()
-                item_json = json.dumps(
-                    data, default=datetimeconverter, sort_keys=True
-                )
+                item_json = master_serializer(item)
                 results.append(json.loads(item_json))
 
             response = {
@@ -306,10 +285,7 @@ class Items(Resource):
         results = []
 
         for item in paginate_items.items:
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
+            item_json = master_serializer(item)
             results.append(json.loads(item_json))
 
         response = {
@@ -353,10 +329,7 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Shopping list found!",
             "item": json.loads(item_json)
@@ -412,10 +385,7 @@ class SingleItem(Resource):
         item.name = name
         item.quantity = quantity
         item.save()
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Item updated!",
             "item": json.loads(item_json)
@@ -448,10 +418,7 @@ class SingleItem(Resource):
 
         item.bought = True
         item.save()
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Item bought!",
             "item": json.loads(item_json)
@@ -488,3 +455,4 @@ class SingleItem(Resource):
             "message": message
         }
         return response, 200
+

@@ -1,5 +1,6 @@
 """This module contains helper functions used in the API"""
 import datetime
+import json
 import re
 from functools import wraps
 
@@ -23,6 +24,15 @@ def datetimeconverter(obj):
     """Function to convert datime objects to a string"""
     if isinstance(obj, datetime.datetime):
         return obj.__str__()
+
+
+def master_serializer(resource):
+    """Function to return a resource json"""
+    data = resource.serialize()
+    user_json = json.dumps(
+        data, default=datetimeconverter, sort_keys=True
+    )
+    return user_json
 
 
 def token_required(funct):
