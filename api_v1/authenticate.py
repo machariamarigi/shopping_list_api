@@ -33,6 +33,7 @@ class Registration(Resource):
         if validation_email:
             return validation_email
 
+
         if len(password) < 8:
             response = {
                 'message': 'Password too short.',
