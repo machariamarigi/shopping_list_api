@@ -35,10 +35,7 @@ class AuthTestCase(TestBase):
             data=bad_user
         )
         result = json.loads(res.data.decode())
-        self.assertEqual(
-            result['message'],
-            'Username cannot contain special characters.'
-        )
+        self.assertIn('No special characters for users names', str(result))
         self.assertEqual(res.status_code, 400)
 
     def test_proper_email_registration(self):
@@ -97,7 +94,7 @@ class AuthTestCase(TestBase):
         result = json.loads(second_res.data.decode())
         self.assertEqual(second_res.status_code, 400)
         self.assertIn(
-            "Email already used. Try",
+            "Email or username already used. Try",
             result['message']
         )
 
