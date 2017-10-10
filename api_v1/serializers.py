@@ -8,7 +8,7 @@ register_args_model = auth.model(
     {
         'email': fields.String(required=True, default="user@example.com"),
         'password': fields.String(required=True, default="password_example"),
-        'username': fields.String(required=True, default="user_example"),
+        'username': fields.String(required=True, default="user_example")
     }
 )
 
@@ -28,5 +28,13 @@ item_model = sh_ns.model(
     'Item', {
         'name': fields.String(required=True, default="Carrots"),
         'quantity': fields.Integer(required=True, default=1)
+    }
+)
+
+user_model = sh_ns.model(
+    'user',
+    {
+        'email': fields.String(required=True, default="user@example.com"),
+        'username': fields.String(required=True, default="user_example")
     }
 )
