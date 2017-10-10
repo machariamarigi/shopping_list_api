@@ -30,6 +30,13 @@ login_parser.add_argument(
     help='required and must be a string'
 )
 
+password_reset = reqparse.RequestParser()
+password_reset.add_argument(
+    'email',
+    required=True,
+    help='require and must be a string'
+)
+
 shoppinglist_parser = reqparse.RequestParser()
 shoppinglist_parser.add_argument(
     'name',

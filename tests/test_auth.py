@@ -130,3 +130,52 @@ class AuthTestCase(TestBase):
         result = json.loads(login_res.data.decode())
         self.assertEqual(
             result['message'], "Invalid email or password, Please try again")
+
+    def test_password_reset(self):
+        """Method to test if API can reset a users password"""
+        res = self.client.post(
+            '/api/v1/auth/register',
+            data=self.user_data
+        )
+        self.assertEqual(res.status_code, 201)
+
+        login_res = self.client.post(
+            '/api/v1/auth/login',
+            data=self.user_data_login
+        )
+        self.assertEqual(login_res.status_code, 200)
+
+        reset_res = self.client.post(
+            '/api/v1/auth/reset_password',
+            data={'email': 'test@test.com'}
+        )
+        self.assertEqual(reset_res.status_code, 200)
+
+        login_res2 = self.client.post(
+            '/api/v1/auth/login',
+            data=self.user_data_login
+        )
+        self.assertEqual(login_res2.status_code, 401)
+
+    def test_password_reset_bad_email(self):
+        """
+        Method to test if API cannot reset a users
+        password with abad email
+        """
+        res = self.client.post(
+            '/api/v1/auth/register',
+            data=self.user_data
+        )
+        self.assertEqual(res.status_code, 201)
+
+        login_res = self.client.post(
+            '/api/v1/auth/login',
+            data=self.user_data_login
+        )
+        self.assertEqual(login_res.status_code, 200)
+
+        reset_res = self.client.post(
+            '/api/v1/auth/reset_password',
+            data={'email': 'tes@test.com'}
+        )
+        self.assertEqual(reset_res.status_code, 400)

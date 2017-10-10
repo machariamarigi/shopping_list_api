@@ -5,9 +5,11 @@ from sqlalchemy import func
 
 from api_v1 import auth
 from api_v1.models import User
-from api_v1.serializers import register_args_model, login_args_model
-from api_v1.helpers import name_validalidation, email_validation
-from api_v1.parsers import registration_parser, login_parser
+from api_v1.serializers import (register_args_model, login_args_model,
+                                password_reset_args_model)
+from api_v1.helpers import (
+    name_validalidation, email_validation, password_generator)
+from api_v1.parsers import registration_parser, login_parser, password_reset
 
 
 @auth.route("/register", endpoint='register')
@@ -32,7 +34,6 @@ class Registration(Resource):
         validation_email = email_validation(email)
         if validation_email:
             return validation_email
-
 
         if len(password) < 8:
             response = {
@@ -92,3 +93,38 @@ class Login(Resource):
                 'status': 'Login Failed'
             }
             return response, 401
+
+
+@auth.route("/reset_password", endpoint='reset_password')
+class PasswordReset(Resource):
+
+    @auth.expect(password_reset_args_model)
+    def post(self):
+        """
+            Handle resetting of registered users passwords.
+            Resource Url --> /api/v1/auth/reset_password
+        """
+        args = password_reset.parse_args()
+        email = args.get('email')
+        new_password = password_generator()
+
+        validation_email = email_validation(email)
+        if validation_email:
+            return validation_email
+
+        user = User.query.filter_by(email=email).first()
+        if user:
+            user.password = new_password
+            user.save()
+            response = {
+                "message": "Password has been reset",
+                "status": "Reset password succesful!",
+                "new_password": new_password
+            }
+            return response, 200
+        else:
+            response = {
+                'message': 'User email does not exist, Please try again',
+                'status': 'Reset password failed!'
+            }
+            return response, 400
