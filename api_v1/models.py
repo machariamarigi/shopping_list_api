@@ -30,6 +30,7 @@ class BaseModel(db.Model):
         dictionary_mapping = {
             attribute.name: getattr(self, attribute.name)
             for attribute in self.__table__.columns
+            if attribute.name != 'password_hash'
         }
         return dictionary_mapping
 
@@ -71,7 +72,7 @@ class User(BaseModel):
     def generate_token(self, user_id):
         """Generate the access token"""
         payload = {
-            'exp': datetime.utcnow() + timedelta(minutes=5),
+            'exp': datetime.utcnow() + timedelta(minutes=15),
             'iat': datetime.utcnow(),
             'sub': user_id
         }
