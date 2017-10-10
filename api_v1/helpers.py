@@ -1,5 +1,6 @@
 """This module contains helper functions used in the API"""
 import datetime
+import json
 import re
 from functools import wraps
 
@@ -9,7 +10,7 @@ from api_v1.models import User
 
 
 def name_validalidation(name, context):
-    """Method used to validate various names"""
+    """Function used to validate various names"""
     if len(name.strip()) == 0 or not re.match("^[-a-zA-Z0-9_\\s]*$", name):
         message = "Name shouldn't be empty. No special characters"
         response = {
@@ -19,10 +20,29 @@ def name_validalidation(name, context):
         return response, 400
 
 
+def email_validation(email):
+    """Function used to validate users emails"""
+    if not re.match(r"(^[a-zA-Z0-9_.]+@[a-zA-Z0-9-]+\.[a-z]+$)", email):
+        response = {
+            'message': 'Incorrect email format.',
+            'status': 'Registration failed'
+        }
+        return response, 400
+
+
 def datetimeconverter(obj):
     """Function to convert datime objects to a string"""
     if isinstance(obj, datetime.datetime):
         return obj.__str__()
+
+
+def master_serializer(resource):
+    """Function to return a resource json"""
+    data = resource.serialize()
+    user_json = json.dumps(
+        data, default=datetimeconverter, sort_keys=True
+    )
+    return user_json
 
 
 def token_required(funct):

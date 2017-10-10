@@ -61,3 +61,15 @@ paginate_query_parser.add_argument(
 paginate_query_parser.add_argument(
     'limit', type=int, required=False, help="limit per page"
 )
+
+user_parser = reqparse.RequestParser()
+user_parser.add_argument(
+    'username',
+    required=True,
+    help='required and must be a string'
+)
+user_parser.add_argument(
+    'email',
+    required=True,
+    help='Required and must be a string'
+)

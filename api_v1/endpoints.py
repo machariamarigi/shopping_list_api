@@ -6,12 +6,12 @@ from flask_restplus import Resource
 from sqlalchemy import func
 
 from api_v1 import sh_ns
-from api_v1.serializers import shoppinglist_model, item_model
-from api_v1.models import Shoppinglist, Shoppingitem
-from api_v1.helpers import (name_validalidation, datetimeconverter,
-                            token_required)
+from api_v1.serializers import shoppinglist_model, item_model, user_model
+from api_v1.models import Shoppinglist, Shoppingitem, User
+from api_v1.helpers import (name_validalidation, token_required,
+                            master_serializer, email_validation)
 from api_v1.parsers import (shoppinglist_parser, paginate_query_parser,
-                            item_parser)
+                            item_parser, user_parser)
 
 
 @sh_ns.header(
@@ -52,10 +52,7 @@ class Shoppinglists(Resource):
 
         shoppinglist = Shoppinglist(name=name, created_by=user_id)
         shoppinglist.save()
-        data = shoppinglist.serialize()
-        sh_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        sh_json = master_serializer(shoppinglist)
         response = {
             "message": "Shopping List created",
             "shoppinglist": json.loads(sh_json)
@@ -82,10 +79,7 @@ class Shoppinglists(Resource):
             results = []
 
             for shoppinglist in shoppinglists:
-                data = shoppinglist.serialize()
-                sh_json = json.dumps(
-                    data, default=datetimeconverter, sort_keys=True
-                )
+                sh_json = master_serializer(shoppinglist)
                 results.append(json.loads(sh_json))
 
             response = {
@@ -99,10 +93,7 @@ class Shoppinglists(Resource):
         results = []
 
         for shoppinglist in paginate_shoppinglists.items:
-            data = shoppinglist.serialize()
-            sh_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
+            sh_json = master_serializer(shoppinglist)
             results.append(json.loads(sh_json))
 
         response = {
@@ -136,10 +127,7 @@ class SingleShoppinglist(Resource):
             }
             return response, 404
 
-        data = shoppinglist.serialize()
-        sh_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        sh_json = master_serializer(shoppinglist)
         response = {
             "message": "Shopping list found!",
             "shoppinglist": json.loads(sh_json)
@@ -184,10 +172,7 @@ class SingleShoppinglist(Resource):
 
         shoppinglist.name = name
         shoppinglist.save()
-        data = shoppinglist.serialize()
-        sh_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        sh_json = master_serializer(shoppinglist)
         response = {
             "message": "Shopping List updated!",
             "shoppinglist": json.loads(sh_json)
@@ -258,10 +243,7 @@ class Items(Resource):
         item = Shoppingitem(
             name=name, quantity=quantity, shoppinglist=list_id)
         item.save()
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Shopping List created",
             "item": json.loads(item_json)
@@ -289,10 +271,7 @@ class Items(Resource):
             results = []
 
             for item in items:
-                data = item.serialize()
-                item_json = json.dumps(
-                    data, default=datetimeconverter, sort_keys=True
-                )
+                item_json = master_serializer(item)
                 results.append(json.loads(item_json))
 
             response = {
@@ -306,10 +285,7 @@ class Items(Resource):
         results = []
 
         for item in paginate_items.items:
-            data = item.serialize()
-            item_json = json.dumps(
-                data, default=datetimeconverter, sort_keys=True
-            )
+            item_json = master_serializer(item)
             results.append(json.loads(item_json))
 
         response = {
@@ -353,10 +329,7 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Shopping list found!",
             "item": json.loads(item_json)
@@ -412,10 +385,7 @@ class SingleItem(Resource):
         item.name = name
         item.quantity = quantity
         item.save()
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Item updated!",
             "item": json.loads(item_json)
@@ -448,10 +418,7 @@ class SingleItem(Resource):
 
         item.bought = True
         item.save()
-        data = item.serialize()
-        item_json = json.dumps(
-            data, default=datetimeconverter, sort_keys=True
-        )
+        item_json = master_serializer(item)
         response = {
             "message": "Item bought!",
             "item": json.loads(item_json)
@@ -484,6 +451,146 @@ class SingleItem(Resource):
 
         item.delete()
         message = "Item {} deleted!".format(item.name)
+        response = {
+            "message": message
+        }
+        return response, 200
+
+
+@sh_ns.header(
+    "Authorization",
+    description="JWT token for authenticationg users",
+    required=True
+)
+@sh_ns.route('/users')
+class Users(Resource):
+    """Class used to handle multiple users"""
+
+    @token_required
+    @sh_ns.expect(paginate_query_parser)
+    def get(self, user_id):
+        """
+            Handle getting of all users
+            Resource Url --> /api/v1/users
+        """
+        del user_id
+
+        args = paginate_query_parser.parse_args(request)
+        search_query = args.get("q")
+        page = args.get('page', 1)
+        per_page = args.get('limit', 10)
+
+        if search_query:
+            users = User.query.filter(
+                User.username.ilike('%' + search_query + '%'))
+            results = []
+
+            for user in users:
+                user_json = master_serializer(user)
+                results.append(json.loads(user_json))
+
+            response = {
+                "message": "Users found!",
+                "users": results
+            }
+            return response, 200
+
+        users = User.query
+        paginate_users = users.paginate(page, per_page, True)
+        results = []
+
+        for user in paginate_users.items:
+            user_json = master_serializer(user)
+            results.append(json.loads(user_json))
+
+        response = {
+            "message": "Users found!",
+            "users": results
+        }
+        return response, 200
+
+
+@sh_ns.header(
+    "Authorization",
+    description="JWT token for authenticationg users",
+    required=True
+)
+@sh_ns.route('/user')
+class SingleUser(Resource):
+    """Class to handle methods on a single a user"""
+
+    @token_required
+    def get(self, user_id):
+        """
+            Handle getting of a single user via jwt token
+            Resource Url --> /api/v1/users
+        """
+
+        user = User.query.filter_by(uuid=user_id).first()
+
+        user_json = master_serializer(user)
+
+        response = {
+            "message": "User found!",
+            "user": json.loads(user_json)
+        }
+
+        return response, 200
+
+    @token_required
+    @sh_ns.expect(user_model)
+    def put(self, user_id):
+        """
+            Handle editing of a single user via jwt token
+            Resource Url --> /api/v1/users
+        """
+        args = user_parser.parse_args()
+        username = args.get('username')
+        email = args.get('email')
+
+        user = User.query.filter_by(uuid=user_id).first()
+
+        validation_name = name_validalidation(username, "users")
+        if validation_name:
+            return validation_name
+
+        validation_email = email_validation(email)
+        if validation_email:
+            return validation_email
+
+        user_email = User.query.filter_by(email=email).first()
+        user_username = User.query.filter(
+            func.lower(User.username) == username.lower()).first()
+        if user_email and user_username:
+            if username != user.username or email != user.email:
+                messg = 'Email or username already used. Try editing to' \
+                        'another one'
+                response = {
+                    'message': messg
+                }
+                return response, 400
+
+        user.username = username
+        user.email = email
+        user.save()
+        user_json = master_serializer(user)
+        response = {
+            "message": "User updated!",
+            "user": json.loads(user_json)
+        }
+        return response, 200
+
+    @token_required
+    def delete(self, user_id):
+        """
+            Handle deleting of a user via an id
+            Resource Url --> /api/v1/users
+        """
+
+        user = User.query.filter_by(uuid=user_id).first()
+        user.delete()
+
+        message = "User {} account deleted!".format(user.username)
         response = {
             "message": message
         }
