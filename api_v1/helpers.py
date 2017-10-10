@@ -2,6 +2,8 @@
 import datetime
 import json
 import re
+import string
+import random
 from functools import wraps
 
 from flask import request
@@ -72,3 +74,8 @@ def token_required(funct):
     wrapper.__doc__ = funct.__doc__
     wrapper.__name__ = funct.__name__
     return wrapper
+
+
+def password_generator(size=8, chars=string.ascii_uppercase + string.digits):
+    """Function to generate a random password"""
+    return ''.join(random.choice(chars) for _ in range(size))

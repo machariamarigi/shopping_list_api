@@ -20,6 +20,13 @@ login_args_model = auth.model(
     }
 )
 
+password_reset_args_model = auth.model(
+    'password_rest_args_model',
+    {
+        'email': fields.String(required=True, default="user@example.com")
+    }
+)
+
 shoppinglist_model = sh_ns.model('ShoppingList', {
     'name': fields.String(required=True, default="Groceries")
 })
