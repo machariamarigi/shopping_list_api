@@ -46,7 +46,8 @@ class User(BaseModel):
     password_hash = db.Column(db.String(128))
     joined_on = db.Column(db.DateTime(), default=datetime.utcnow)
     bucketlists = db.relationship(
-        'Shoppinglist', backref='creator', lazy='dynamic')
+        'Shoppinglist', backref='creator', lazy='dynamic',
+        cascade="all, delete-orphan")
 
     def __init__(self, username, email, password):
         """Constructor for the User model"""
@@ -57,7 +58,7 @@ class User(BaseModel):
 
     @property
     def password(self):
-        """Return password harsh when someone tries to acces the password"""
+        """Return password hash when someone tries to acces the password"""
         return self.password_hash
 
     @password.setter
@@ -113,7 +114,8 @@ class Shoppinglist(BaseModel):
     ), onupdate=db.func.current_timestamp())
     created_by = db.Column(db.Integer, db.ForeignKey('users.uuid'))
     items = db.relationship(
-        'Shoppingitem', backref='creator', lazy='dynamic')
+        'Shoppingitem', backref='creator', lazy='dynamic',
+        cascade="all, delete-orphan")
 
     def __init__(self, name, created_by=None):
         """Constructor for Shoppinglist Model"""
