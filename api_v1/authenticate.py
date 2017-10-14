@@ -97,7 +97,7 @@ class Login(Resource):
 
 @auth.route("/reset_password", endpoint='reset_password')
 class PasswordReset(Resource):
-
+    """Class to handle resetting of user passwords"""
     @auth.expect(password_reset_args_model)
     def post(self):
         """

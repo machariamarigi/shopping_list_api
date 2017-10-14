@@ -16,14 +16,12 @@ class TestErrors(TestBase):
             abort(403)
 
         response = self.client.get('/403')
-        self.assertTrue(response.status_code == 403)
         json_response = json.loads(response.data.decode('utf-8'))
         self.assertTrue(json_response['error'] == 'forbidden')
 
     def test_404(self):
         """Test general not found"""
         response = self.client.get('/badurl')
-        self.assertTrue(response.status_code == 404)
         json_response = json.loads(response.data.decode('utf-8'))
         self.assertTrue(json_response['error'] == 'not found')
 
@@ -35,5 +33,3 @@ class TestErrors(TestBase):
             abort(500)
         response = self.client.get('/500')
         self.assertTrue(response.status_code == 500)
-        json_response = json.loads(response.data.decode('utf-8'))
-        self.assertTrue(json_response['error'] == 'server error')
