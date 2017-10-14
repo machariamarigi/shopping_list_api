@@ -28,7 +28,7 @@ class ShoppinglistTestCase(TestBase):
 
         bad_item1 = {'name': 'f**/fdgd"%', 'quantity': 2}
         bad_item2 = {'name': 'Hardware', 'quantity': 'fish'}
-        res = self.client.post(
+        self.client.post(
             '/api/v1/shoppinglist/{}/items'.format(self.shoppinglist_id),
             headers=dict(Authorization=self.access_token),
             data=bad_item1
@@ -49,7 +49,7 @@ class ShoppinglistTestCase(TestBase):
         """
         self.create_shoppinglist()
 
-        res = self.client.post(
+        self.client.post(
             '/api/v1/shoppinglist/{}/items'.format(self.shoppinglist_id),
             headers=dict(Authorization=self.access_token),
             data=self.item
@@ -78,6 +78,16 @@ class ShoppinglistTestCase(TestBase):
         )
         self.assertEqual(res.status_code, 200)
 
+    def test_get_no_items(self):
+        """Test if API can get all items of a shoppinglist"""
+        self.create_shoppinglist()
+
+        res = self.client.get(
+            '/api/v1/shoppinglist/{}/items'.format(self.shoppinglist_id),
+            headers=dict(Authorization=self.access_token)
+        )
+        self.assertIn('Shopping list has no items', str(res.data))
+
     def test_get_query_items(self):
         """Test if API can get items of a shoppinglist via a query term"""
         self.create_shoppinglist()
@@ -93,6 +103,16 @@ class ShoppinglistTestCase(TestBase):
             headers=dict(Authorization=self.access_token)
         )
         self.assertEqual(res.status_code, 200)
+
+    def test_get_bad_query_items(self):
+        """Test if API can get items of a shoppinglist via a query term"""
+        self.create_shoppinglist()
+
+        res = self.client.get(
+            '/api/v1/shoppinglist/{}/items?q=ham'.format(self.shoppinglist_id),
+            headers=dict(Authorization=self.access_token)
+        )
+        self.assertIn('Shopping list has no items matching ham', str(res.data))
 
     def test_get_an_item_by_id(self):
         """Test if API can get a single item based on a given ID"""
@@ -116,7 +136,7 @@ class ShoppinglistTestCase(TestBase):
         """Test if API returns 404 for nonexisting items"""
         self.create_shoppinglist()
 
-        result = self.client.get(
+        self.client.get(
             '/api/v1/shoppinglist/23/item/1',
             headers=dict(Authorization=self.access_token)
         )
@@ -139,7 +159,7 @@ class ShoppinglistTestCase(TestBase):
         results = json.loads(post_result.data.decode())
         item = results['item']
 
-        put_result = self.client.put(
+        self.client.put(
             '/api/v1/shoppinglist/{}/item/{}'.format(
                 self.shoppinglist_id, item['uuid']),
             headers=dict(Authorization=self.access_token),
@@ -203,12 +223,13 @@ class ShoppinglistTestCase(TestBase):
             headers=dict(Authorization=self.access_token),
             data={'name': 'nails', 'quantity': 12}
         )
+        self.assertEqual(put_result.status_code, 400)
 
     def test_edit_nonexisting_item(self):
         """Test if API returns 404 for nonexisting items"""
         self.create_shoppinglist()
 
-        result = self.client.put(
+        self.client.put(
             '/api/v1/shoppinglist/23/item/1',
             headers=dict(Authorization=self.access_token),
             data=self.item
@@ -245,7 +266,7 @@ class ShoppinglistTestCase(TestBase):
         """Test if API returns 404 for nonexisting items"""
         self.create_shoppinglist()
 
-        result = self.client.patch(
+        self.client.patch(
             '/api/v1/shoppinglist/23/item/1',
             headers=dict(Authorization=self.access_token)
         )
@@ -268,7 +289,7 @@ class ShoppinglistTestCase(TestBase):
         results = json.loads(post_result.data.decode())
         item = results['item']
 
-        res = self.client.delete(
+        self.client.delete(
             '/api/v1/shoppinglist/{}/item/{}'.format(
                 self.shoppinglist_id, item['uuid']),
             headers=dict(Authorization=self.access_token)
@@ -285,7 +306,7 @@ class ShoppinglistTestCase(TestBase):
         """Test if API returns 404 for nonexisting shoppinglists"""
         self.create_shoppinglist()
 
-        result = self.client.delete(
+        self.client.delete(
             '/api/v1/shoppinglist/23/item/1',
             headers=dict(Authorization=self.access_token)
         )

@@ -25,6 +25,16 @@ class UsersEndpointsTestCase(TestBase):
         )
         self.assertEqual(res.status_code, 200)
 
+    def test_get_all_users_with_bad_search_query(self):
+        """Test if API can get all users"""
+        self.get_access_token()
+
+        res = self.client.get(
+            '/api/v1/users?q=dfdd',
+            headers=dict(Authorization=self.access_token)
+        )
+        self.assertIn('No users matchin dfdd were found', str(res.data))
+
     def test_get_a_single_user(self):
         """Test if API can return a single user"""
         self.get_access_token()

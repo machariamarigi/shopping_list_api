@@ -53,7 +53,7 @@ class ShoppinglistTestCase(TestBase):
             str(res.data)
         )
 
-    def test_repeat_shoppinglist_name(self):
+    def test_repeate_shoppinglist_name(self):
         """
             Test whether a user can create 2 or more shoppinglists with the
             same name
@@ -89,6 +89,16 @@ class ShoppinglistTestCase(TestBase):
         )
         self.assertEqual(res.status_code, 200)
 
+    def test_get_no_shoppinglists(self):
+        """Test if API can get all shoppinglists"""
+        self.get_access_token()
+
+        res = self.client.get(
+            '/api/v1/shoppinglists',
+            headers=dict(Authorization=self.access_token)
+        )
+        self.assertIn('User has no shopping lists', str(res.data))
+
     def test_get_query_shoppinglists(self):
         """Test if API can get shoppinglists via a query"""
         self.get_access_token()
@@ -104,6 +114,17 @@ class ShoppinglistTestCase(TestBase):
             headers=dict(Authorization=self.access_token)
         )
         self.assertEqual(res.status_code, 200)
+
+    def test_get_with_bad_query_shoppinglists(self):
+        """Test if API can get shoppinglists via a query"""
+        self.get_access_token()
+
+        res = self.client.get(
+            '/api/v1/shoppinglists?q=hardw',
+            headers=dict(Authorization=self.access_token)
+        )
+        self.assertIn(
+            'User has no shopping lists matching hardw', str(res.data))
 
     def test_get_a_shoppinglist_by_id(self):
         """Test if API can get a single shopping list based on a given ID"""
@@ -144,7 +165,7 @@ class ShoppinglistTestCase(TestBase):
         results = json.loads(post_result.data.decode())
         shoppinglist = results['shoppinglist']
 
-        put_result = self.client.put(
+        self.client.put(
             '/api/v1/shoppinglist/{}'.format(shoppinglist['uuid']),
             headers=dict(Authorization=self.access_token),
             data={'name': 'Hardware 2'}
@@ -193,7 +214,7 @@ class ShoppinglistTestCase(TestBase):
         results = json.loads(post_result.data.decode())
         shoppinglist = results['shoppinglist']
 
-        post_result2 = self.client.post(
+        self.client.post(
             '/api/v1/shoppinglists',
             headers=dict(Authorization=self.access_token),
             data={'name': 'groceries'}
@@ -229,7 +250,7 @@ class ShoppinglistTestCase(TestBase):
         results = json.loads(post_result.data.decode())
         shoppinglist = results['shoppinglist']
 
-        res = self.client.delete(
+        self.client.delete(
             '/api/v1/shoppinglist/{}'.format(shoppinglist['uuid']),
             headers=dict(Authorization=self.access_token)
         )

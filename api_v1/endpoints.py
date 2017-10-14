@@ -82,6 +82,13 @@ class Shoppinglists(Resource):
                 sh_json = master_serializer(shoppinglist)
                 results.append(json.loads(sh_json))
 
+            if results == []:
+                message = "User has no shopping lists matching {}"
+                response = {
+                    "message": message.format(search_query)
+                }
+                return response, 200
+
             response = {
                 "message": "Users shoppinglists found!",
                 "shoppinglists": results
@@ -95,6 +102,12 @@ class Shoppinglists(Resource):
         for shoppinglist in paginate_shoppinglists.items:
             sh_json = master_serializer(shoppinglist)
             results.append(json.loads(sh_json))
+
+        if results == []:
+            response = {
+                "message": "User has no shopping lists",
+            }
+            return response, 200
 
         response = {
             "message": "Users shoppinglists found!",
@@ -274,6 +287,13 @@ class Items(Resource):
                 item_json = master_serializer(item)
                 results.append(json.loads(item_json))
 
+            if results == []:
+                message = "Shopping list has no items matching {}"
+                response = {
+                    "message": message.format(search_query)
+                }
+                return response, 404
+
             response = {
                 "message": "Users shoppinglists found!",
                 "shoppinglists": results
@@ -287,6 +307,12 @@ class Items(Resource):
         for item in paginate_items.items:
             item_json = master_serializer(item)
             results.append(json.loads(item_json))
+
+        if results == []:
+            response = {
+                "message": "Shopping list has no items"
+            }
+            return response, 404
 
         response = {
             "message": "Shopping list's items found",
@@ -488,6 +514,13 @@ class Users(Resource):
             for user in users:
                 user_json = master_serializer(user)
                 results.append(json.loads(user_json))
+
+            if results == []:
+                message = "No users matchin {} were found"
+                response = {
+                    "message": message.format(search_query)
+                }
+                return response, 404
 
             response = {
                 "message": "Users found!",
