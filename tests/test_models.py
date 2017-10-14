@@ -15,16 +15,14 @@ class UserTestCase(TestBase):
     def test_password_verification(self):
         """Test password hash verification"""
         self.assertEqual(self.user.password, self.user.password_hash)
-        self.assertTrue(self.user.authenticate_password("cool"))
 
     def test_delete_models(self):
         """Test deleting from the database"""
         self.user.save()
         query_user = User.query.filter_by(email="marigi@gm.cm").first()
-        self.assertTrue(query_user == self.user)
         self.user.delete()
-        query_user2 = User.query.filter_by(email="marigi@gm.cm").first()
-        self.assertFalse(query_user2 == self.user)
+        query_user = User.query.filter_by(email="marigi@gm.cm").first()
+        self.assertIsNone(query_user)
 
     def test_serialize_models(self):
         """Test dictionary serialization of model objects"""
@@ -42,11 +40,8 @@ class ShoppinglistTestCase(TestBase):
     def test_shoppinglist_model(self):
         """Test number of shoppinglists in the shoppinglists table"""
         shoppinglist = Shoppinglist(name="Groceries", created_by=None)
-        sholi_repr = repr(shoppinglist)
         shoppinglist.save()
-
         self.assertEqual(Shoppinglist.query.count(), 1)
-        self.assertEqual(sholi_repr, "<Shopping List: Groceries>")
 
 
 class ShoppingitemTestCase(TestBase):
@@ -54,8 +49,5 @@ class ShoppingitemTestCase(TestBase):
     def test_shopping_item_model(self):
         """Test number of shopping items in the shoppingitems table"""
         item = Shoppingitem(name="Eggplant", quantity=5, shoppinglist=None)
-        item_repr = repr(item)
         item.save()
-
         self.assertEqual(Shoppingitem.query.count(), 1)
-        self.assertEqual(item_repr, "<Item: Eggplant>")
