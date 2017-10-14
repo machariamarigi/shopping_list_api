@@ -54,7 +54,7 @@ item_parser.add_argument(
 item_parser.add_argument(
     'quantity',
     required=True,
-    type=int,
+    type=float,
     help="Required and must be an integer"
 )
 
