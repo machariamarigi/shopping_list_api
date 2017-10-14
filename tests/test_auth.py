@@ -19,7 +19,7 @@ class AuthTestCase(TestBase):
             'Registered successfully, please log in.'
         )
 
-    def test_proper_username_registration(self):
+    def test_bad_username_registration(self):
         """
             Test if API rejects users with special characters in their username
         """
@@ -36,7 +36,7 @@ class AuthTestCase(TestBase):
         result = json.loads(res.data.decode())
         self.assertIn('No special characters for users names', str(result))
 
-    def test_proper_email_registration(self):
+    def test_bad_email_registration(self):
         """
             Test if API rejects users whose emails have improper format
         """
@@ -137,7 +137,7 @@ class AuthTestCase(TestBase):
         )
         self.assertEqual(login_res.status_code, 200)
 
-        reset_res = self.client.post(
+        self.client.post(
             '/api/v1/auth/reset_password',
             data={'email': 'test@test.com'}
         )
@@ -153,12 +153,28 @@ class AuthTestCase(TestBase):
         Method to test if API cannot reset a users
         password with abad email
         """
-        res = self.client.post(
+        self.client.post(
             '/api/v1/auth/register',
             data=self.user_data
         )
 
-        login_res = self.client.post(
+        reset_res = self.client.post(
+            '/api/v1/auth/reset_password',
+            data={'email': 'testest.com'}
+        )
+        self.assertEqual(reset_res.status_code, 400)
+
+    def test_password_reset_non_existing_user(self):
+        """
+        Method to test if API cannot reset a users
+        password with abad email
+        """
+        self.client.post(
+            '/api/v1/auth/register',
+            data=self.user_data
+        )
+
+        self.client.post(
             '/api/v1/auth/login',
             data=self.user_data_login
         )
