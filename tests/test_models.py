@@ -40,7 +40,9 @@ class ShoppinglistTestCase(TestBase):
     def test_shoppinglist_model(self):
         """Test number of shoppinglists in the shoppinglists table"""
         shoppinglist = Shoppinglist(name="Groceries", created_by=None)
+        sholi_repr = repr(shoppinglist)
         shoppinglist.save()
+
         self.assertEqual(Shoppinglist.query.count(), 1)
 
 
@@ -49,5 +51,7 @@ class ShoppingitemTestCase(TestBase):
     def test_shopping_item_model(self):
         """Test number of shopping items in the shoppingitems table"""
         item = Shoppingitem(name="Eggplant", quantity=5, shoppinglist=None)
+        item_repr = repr(item)
         item.save()
+
         self.assertEqual(Shoppingitem.query.count(), 1)
