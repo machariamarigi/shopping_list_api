@@ -82,6 +82,11 @@ Application Programming Interface for a shoppinglist app.
 |----------------------------------------------|-------------------|---------------------------------|----------------|
 | /api/v1/auth/register                        |POST               |User registers                   |FALSE           |
 | /api/v1/auth/login                           |POST               |User login                       |FALSE           |
+| /api/v1/auth/reset_password                  |POST               |Reset password for a user        |FALSE           |
+| /api/v1/user                                 |GET                |Get details of a user            |TRUE            |
+| /api/v1/user                                 |PUT                |Edit a users's details           |TRUE            |
+| /api/v1/user                                 |DELETE             |Remove a user from the app       |TRUE            |
+| /api/v1/users                                |GET                |List all users                   |TRUE            |
 | /api/v1/shoppinglists                        |POST               |Create shopping lists            |TRUE            |
 | /api/v1/shoppinglists                        |GET                |List shopping lists              |TRUE            |
 | /api/v1/shoppinglist/<list_id>               |GET                |List a single shopping list      |TRUE            |
