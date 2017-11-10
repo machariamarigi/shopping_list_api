@@ -1,6 +1,7 @@
 """Module containing factory function for the application"""
 from flask import Flask, redirect
 from flask_restplus import Api
+from flask_cors import CORS
 
 from config import app_config
 from api_v1 import Blueprint_apiV1
@@ -20,6 +21,7 @@ def create_app(environment):
     app = Flask(__name__)
     app.config.from_object(app_config[environment])
     db.init_app(app)
+    CORS(app)
 
     app.register_blueprint(Blueprint_apiV1)
 
