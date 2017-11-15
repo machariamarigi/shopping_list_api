@@ -85,7 +85,7 @@ class Shoppinglists(Resource):
             if results == []:
                 message = "User has no shopping lists matching {}"
                 response = {
-                    "message": message.format(search_query)
+                    "message": message.format(search_query),
                     "shoppinglists": results
                 }
                 return response, 200
