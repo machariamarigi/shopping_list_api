@@ -76,11 +76,15 @@ class Shoppinglists(Resource):
             shoppinglists = Shoppinglist.query.filter(
                 Shoppinglist.name.ilike('%' + search_query + '%'),
                 Shoppinglist.created_by == user_id)
+            paginate_shoppinglists = shoppinglists.paginate(page, per_page, True)
             results = []
 
-            for shoppinglist in shoppinglists:
+            for shoppinglist in paginate_shoppinglists.items:
                 sh_json = master_serializer(shoppinglist)
                 results.append(json.loads(sh_json))
+
+            next_page = None
+            previous_page = None
 
             if results == []:
                 message = "User has no shopping lists matching {}"
@@ -90,7 +94,16 @@ class Shoppinglists(Resource):
                 }
                 return response, 200
 
+            if paginate_shoppinglists.has_next:
+                next_page = '/shoppinglists' + '?page=' + str(page + 1) + \
+                            '&limit=' + str(per_page)
+            if paginate_shoppinglists.has_prev:
+                previous_page = '/shoppinglists' + '?page=' + str(page - 1) + \
+                    '&limit=' + str(per_page)
+
             response = {
+                'previous_page': previous_page,
+                'next_page': next_page,
                 "message": "Users shoppinglists found!",
                 "shoppinglists": results
             }
