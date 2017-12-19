@@ -76,11 +76,15 @@ class Shoppinglists(Resource):
             shoppinglists = Shoppinglist.query.filter(
                 Shoppinglist.name.ilike('%' + search_query + '%'),
                 Shoppinglist.created_by == user_id)
+            paginate_shoppinglists = shoppinglists.paginate(page, per_page, True)
             results = []
 
-            for shoppinglist in shoppinglists:
+            for shoppinglist in paginate_shoppinglists.items:
                 sh_json = master_serializer(shoppinglist)
                 results.append(json.loads(sh_json))
+
+            next_page = None
+            previous_page = None
 
             if results == []:
                 message = "User has no shopping lists matching {}"
@@ -90,7 +94,16 @@ class Shoppinglists(Resource):
                 }
                 return response, 200
 
+            if paginate_shoppinglists.has_next:
+                next_page = '/shoppinglists' + '?page=' + str(page + 1) + \
+                            '&limit=' + str(per_page)
+            if paginate_shoppinglists.has_prev:
+                previous_page = '/shoppinglists' + '?page=' + str(page - 1) + \
+                    '&limit=' + str(per_page)
+
             response = {
+                'previous_page': previous_page,
+                'next_page': next_page,
                 "message": "Users shoppinglists found!",
                 "shoppinglists": results
             }
@@ -111,7 +124,19 @@ class Shoppinglists(Resource):
             }
             return response, 200
 
+        next_page = None
+        previous_page = None
+
+        if paginate_shoppinglists.has_next:
+            next_page = '/shoppinglists' + '?page=' + str(page + 1) + \
+                        '&limit=' + str(per_page)
+        if paginate_shoppinglists.has_prev:
+            previous_page = '/shoppinglists' + '?page=' + str(page - 1) + \
+                '&limit=' + str(per_page)
+
         response = {
+            'previous_page': previous_page,
+            'next_page': next_page,
             "message": "Users shoppinglists found!",
             "shoppinglists": results
         }
@@ -292,13 +317,13 @@ class Items(Resource):
             if results == []:
                 message = "Shopping list has no items matching {}"
                 response = {
-                    "message": message.format(search_query)
+                    "message": message.format(search_query),
+                    "items": results
                 }
-                return response, 404
-
+                return response, 200
             response = {
                 "message": "Users shoppinglists found!",
-                "shoppinglists": results
+                "items": results
             }
             return response, 200
 
@@ -312,9 +337,9 @@ class Items(Resource):
 
         if results == []:
             response = {
-                "message": "Shopping list has no items"
+                "message": "Shopping list has no items", "items": results
             }
-            return response, 404
+            return response, 200
 
         response = {
             "message": "Shopping list's items found",
@@ -336,7 +361,7 @@ class SingleItem(Resource):
     def get(self, user_id, list_id, item_id):
         """
             Handle getting of an item in a shopping list via an id
-            Resource Url --> /api/v1/shoppinglist/<list_id>/item/<item_id>
+            Resource Url --> /api/v1/shoppinglist/list_id/item/item_id
         """
 
         shoppinglist = Shoppinglist.query.filter_by(
@@ -444,7 +469,7 @@ class SingleItem(Resource):
             }
             return response, 404
 
-        item.bought = True
+        item.bought = not item.bought
         item.save()
         item_json = master_serializer(item)
         response = {
